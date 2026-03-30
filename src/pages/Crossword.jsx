@@ -58,6 +58,10 @@ function getWordCells(clue, direction) {
   return cells
 }
 
+function fmtTime(s) {
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+}
+
 function Crossword() {
   // Puzzle loading
   const [puzzleId, setPuzzleId] = useState(null)
@@ -81,8 +85,8 @@ function Crossword() {
   const [showIncorrect, setShowIncorrect] = useState(false)
   const [completedPuzzles, setCompletedPuzzles] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('crossword-completed') || '[]')
-    } catch { return [] }
+      return JSON.parse(localStorage.getItem('crossword-results') || '{}')
+    } catch { return {} }
   })
 
   // Load a puzzle from .puz file
@@ -98,27 +102,51 @@ function Crossword() {
       const data = parsePuz(buffer)
       setPuzzleData(data)
       setPuzzleId(id)
-      setPlayerGrid(
-        Array.from({ length: data.size.rows }, () =>
-          Array(data.size.cols).fill('')
+
+      // Check if already completed
+      let savedResults
+      try { savedResults = JSON.parse(localStorage.getItem('crossword-results') || '{}') } catch { savedResults = {} }
+      const saved = savedResults[id]
+
+      if (saved) {
+        // Show completed state with filled solution grid
+        const filledGrid = data.grid.map((row, r) =>
+          row.map((cell, c) => cell === '#' ? '' : (data.rebus[r]?.[c] || cell))
         )
-      )
-      // Find first non-black cell
-      for (let r = 0; r < data.size.rows; r++) {
-        for (let c = 0; c < data.size.cols; c++) {
-          if (data.grid[r][c] !== '#') {
-            setActiveCell({ row: r, col: c })
-            break
+        setPlayerGrid(filledGrid)
+        setPlayerName(saved.name)
+        setFinalTime(saved.time)
+        setCurrentTime(saved.time)
+        setTimerStarted(false)
+        setShowCelebration(false)
+        setShowIncorrect(false)
+        setRebusMode(false)
+        setActiveDirection('across')
+        setActiveCell({ row: 0, col: 0 })
+        setGamePhase('complete')
+      } else {
+        setPlayerGrid(
+          Array.from({ length: data.size.rows }, () =>
+            Array(data.size.cols).fill('')
+          )
+        )
+        // Find first non-black cell
+        for (let r = 0; r < data.size.rows; r++) {
+          for (let c = 0; c < data.size.cols; c++) {
+            if (data.grid[r][c] !== '#') {
+              setActiveCell({ row: r, col: c })
+              break
+            }
           }
+          if (data.grid[0]?.[0] !== '#') break
         }
-        if (data.grid[0]?.[0] !== '#') break
+        setActiveDirection('across')
+        setTimerStarted(false)
+        setFinalTime(null)
+        setCurrentTime(0)
+        setShowCelebration(false)
+        setGamePhase('entry')
       }
-      setActiveDirection('across')
-      setTimerStarted(false)
-      setFinalTime(null)
-      setCurrentTime(0)
-      setShowCelebration(false)
-      setGamePhase('entry')
     } catch (err) {
       setLoadError('Failed to load puzzle. Please try again.')
       console.error(err)
@@ -286,9 +314,10 @@ function Crossword() {
         setShowCelebration(true)
         setRebusMode(false)
         setShowIncorrect(false)
-        const updated = [...completedPuzzles, puzzleId].filter((v, i, a) => a.indexOf(v) === i)
+        const result = { name: playerName.trim(), time: currentTime, date: new Date().toISOString().slice(0, 10) }
+        const updated = { ...completedPuzzles, [puzzleId]: result }
         setCompletedPuzzles(updated)
-        try { localStorage.setItem('crossword-completed', JSON.stringify(updated)) } catch {}
+        try { localStorage.setItem('crossword-results', JSON.stringify(updated)) } catch {}
         return
       }
 
@@ -505,34 +534,50 @@ function Crossword() {
         </p>
 
         <div className="space-y-4 mb-10">
-          {PUZZLES.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => loadPuzzle(p.id)}
-              disabled={loading}
-              className="w-full text-left bg-cream border border-cream-dark rounded-xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30 group"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-serif text-xl text-wine group-hover:text-maroon transition-colors">
-                    {p.label}
-                  </h3>
-                  <p className="font-sans text-sm text-brown/60 mt-0.5">
-                    {p.description}
-                  </p>
+          {PUZZLES.map((p) => {
+            const result = completedPuzzles[p.id]
+            return (
+              <button
+                key={p.id}
+                onClick={() => loadPuzzle(p.id)}
+                disabled={loading}
+                className={`w-full text-left rounded-xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30 group ${
+                  result ? 'bg-wine/5 border-2 border-wine/20' : 'bg-cream border border-cream-dark'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-serif text-xl text-wine group-hover:text-maroon transition-colors flex items-center gap-2">
+                      {p.label}
+                      {result && (
+                        <span className="text-xs font-sans font-semibold text-wine/60 bg-wine/10 px-2 py-0.5 rounded-full">
+                          {fmtTime(result.time)}
+                        </span>
+                      )}
+                    </h3>
+                    <p className="font-sans text-sm text-brown/60 mt-0.5">
+                      {result ? `Completed by ${result.name}` : p.description}
+                    </p>
+                  </div>
+                  {result ? (
+                    <svg className="w-6 h-6 text-wine/50 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5 text-wine/40 group-hover:text-wine group-hover:translate-x-1 transition-all shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
                 </div>
-                <svg
-                  className="w-5 h-5 text-wine/40 group-hover:text-wine group-hover:translate-x-1 transition-all shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </button>
-          ))}
+              </button>
+            )
+          })}
         </div>
 
         {loadError && (
@@ -661,7 +706,7 @@ function Crossword() {
         const rank = existing.filter((s) => s.time < time).length + 1
         const total = existing.length + 1
         const ordinal = rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`
-        const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles.includes(p.id))
+        const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles[p.id])
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 backdrop-blur-sm px-4">
             <div className="bg-cream-light border-2 border-wine rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-xl animate-[fadeIn_0.4s_ease-out]">
@@ -746,7 +791,7 @@ function Crossword() {
 
       {/* Next puzzle bar for completed state */}
       {gamePhase === 'complete' && !showCelebration && (() => {
-        const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles.includes(p.id))
+        const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles[p.id])
         return (
           <div className="mt-6 text-center flex justify-center gap-4">
             {nextPuzzle ? (

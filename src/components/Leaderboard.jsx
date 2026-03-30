@@ -42,11 +42,26 @@ function formatDate(dateStr) {
 function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime }) {
   // Get scores for the specific puzzle
   let scores = [...(MOCK_SCORES[puzzleId] || [])]
-  if (currentPlayerName && currentPlayerTime != null) {
+
+  // Load saved result from localStorage (persistent)
+  let savedResult = null
+  try {
+    const saved = JSON.parse(localStorage.getItem('crossword-results') || '{}')
+    if (saved[puzzleId]) savedResult = saved[puzzleId]
+  } catch {}
+
+  // Use current session score if available, otherwise use saved
+  const playerName = currentPlayerName || savedResult?.name
+  const playerTime = currentPlayerTime ?? savedResult?.time
+  const playerDate = currentPlayerTime != null
+    ? new Date().toISOString().slice(0, 10)
+    : savedResult?.date
+
+  if (playerName && playerTime != null) {
     scores.push({
-      name: currentPlayerName,
-      time: currentPlayerTime,
-      date: new Date().toISOString().slice(0, 10),
+      name: playerName,
+      time: playerTime,
+      date: playerDate,
       isCurrent: true,
     })
   }
