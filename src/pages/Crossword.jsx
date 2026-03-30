@@ -89,6 +89,17 @@ function Crossword() {
     } catch { return {} }
   })
 
+  // Hide mobile hamburger menu during gameplay
+  const inGame = gamePhase === 'playing' || gamePhase === 'complete' || gamePhase === 'entry'
+  useEffect(() => {
+    if (inGame) {
+      document.documentElement.setAttribute('data-crossword-active', '')
+    } else {
+      document.documentElement.removeAttribute('data-crossword-active')
+    }
+    return () => document.documentElement.removeAttribute('data-crossword-active')
+  }, [inGame])
+
   // Load a puzzle from .puz file
   const loadPuzzle = useCallback(async (id) => {
     const puzzle = PUZZLES.find((p) => p.id === id)

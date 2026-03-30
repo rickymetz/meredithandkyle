@@ -69,3 +69,8 @@
 .stagger-3 { animation-delay: 0.3s; }
 .stagger-4 { animation-delay: 0.4s; }
 .stagger-5 { animation-delay: 0.5s; }
+
+/* Hide mobile menu button during crossword gameplay */
+html[data-crossword-active] #mobile-menu-btn {
+  display: none;
+}

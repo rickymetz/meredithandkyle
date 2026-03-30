@@ -35,8 +35,8 @@ function Layout() {
         </div>
       </header>
 
-      {/* Mobile hamburger button - hidden on crossword page */}
-      <div className={`md:hidden fixed top-4 left-4 z-50 ${location.pathname === '/crossword' ? 'hidden' : ''}`}>
+      {/* Mobile hamburger button - hidden during crossword gameplay */}
+      <div id="mobile-menu-btn" className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-brown bg-cream-light/95 backdrop-blur-sm text-brown hover:bg-cream transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
