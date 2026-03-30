@@ -58,8 +58,9 @@ function CrosswordGrid({
       aria-label="Crossword grid"
     >
       <div
-        className="grid gap-0 w-full max-w-[min(100%,28rem)] mx-auto"
+        className="grid gap-0 w-full mx-auto"
         style={{
+          maxWidth: `min(100%, 28rem, calc(50vh * ${size.cols} / ${size.rows}))`,
           gridTemplateColumns: `repeat(${size.cols}, 1fr)`,
           aspectRatio: `${size.cols} / ${size.rows}`,
         }}

@@ -16,7 +16,7 @@ function CrosswordKeyboard({ onKey, onBackspace, rebusMode, hasRebus, onToggleRe
                 e.preventDefault()
                 onToggleRebus()
               }}
-              className={`flex-none w-14 h-11 rounded-md font-sans text-xs font-semibold transition-all duration-75 shadow-sm flex items-center justify-center ${
+              className={`flex-none w-14 h-10 rounded-md font-sans text-xs font-semibold transition-all duration-75 shadow-sm flex items-center justify-center ${
                 rebusMode
                   ? 'bg-wine text-cream-light'
                   : 'bg-cream text-wine/70'
@@ -34,7 +34,7 @@ function CrosswordKeyboard({ onKey, onBackspace, rebusMode, hasRebus, onToggleRe
                 e.preventDefault()
                 onKey(letter)
               }}
-              className="flex-1 max-w-[2.4rem] h-11 rounded-md bg-cream-light text-brown font-sans font-semibold text-base active:bg-wine/20 active:scale-95 transition-all duration-75 shadow-sm"
+              className="flex-1 max-w-[2.2rem] h-10 rounded-md bg-cream-light text-brown font-sans font-semibold text-[0.9rem] active:bg-wine/20 active:scale-95 transition-all duration-75 shadow-sm"
             >
               {letter}
             </button>
@@ -46,7 +46,7 @@ function CrosswordKeyboard({ onKey, onBackspace, rebusMode, hasRebus, onToggleRe
                 e.preventDefault()
                 onBackspace()
               }}
-              className="flex-none w-12 h-11 rounded-md bg-cream text-brown/70 font-sans text-sm active:bg-wine/20 active:scale-95 transition-all duration-75 shadow-sm flex items-center justify-center"
+              className="flex-none w-12 h-10 rounded-md bg-cream text-brown/70 font-sans text-sm active:bg-wine/20 active:scale-95 transition-all duration-75 shadow-sm flex items-center justify-center"
               aria-label="Backspace"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

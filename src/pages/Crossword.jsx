@@ -669,7 +669,7 @@ function Crossword() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleChangePuzzle}
-            className="text-brown/40 hover:text-wine transition-colors"
+            className="flex items-center justify-center w-10 h-10 -ml-2 text-brown/40 hover:text-wine transition-colors"
             aria-label="Back to puzzle selection"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -737,21 +737,21 @@ function Crossword() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowCelebration(false)}
-                  className="flex-1 py-2.5 px-4 rounded-lg border-2 border-wine text-wine font-semibold text-sm hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+                  className="flex-1 py-3 px-4 rounded-lg border-2 border-wine text-wine font-semibold text-sm hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
                 >
                   View Board
                 </button>
                 {nextPuzzle ? (
                   <button
                     onClick={() => { setShowCelebration(false); loadPuzzle(nextPuzzle.id) }}
-                    className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+                    className="flex-1 py-3 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
                   >
                     Try {nextPuzzle.label}
                   </button>
                 ) : (
                   <button
                     onClick={handleChangePuzzle}
-                    className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+                    className="flex-1 py-3 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
                   >
                     All Puzzles
                   </button>
@@ -833,7 +833,7 @@ function Crossword() {
           <div className="bg-cream-light/95 backdrop-blur-sm border-t border-cream-dark px-3 py-2 flex items-center gap-2">
             <button
               onClick={() => navigateClue(-1)}
-              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
+              className="shrink-0 w-11 h-11 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
               aria-label="Previous clue"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -849,7 +849,7 @@ function Crossword() {
             </p>
             <button
               onClick={() => navigateClue(1)}
-              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
+              className="shrink-0 w-11 h-11 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
               aria-label="Next clue"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
