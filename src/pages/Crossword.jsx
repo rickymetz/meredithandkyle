@@ -77,6 +77,7 @@ function Crossword() {
   const [finalTime, setFinalTime] = useState(null)
   const [currentTime, setCurrentTime] = useState(0)
   const [showCelebration, setShowCelebration] = useState(false)
+  const [rebusMode, setRebusMode] = useState(false)
 
   // Load a puzzle from .puz file
   const loadPuzzle = useCallback(async (id) => {
@@ -123,7 +124,12 @@ function Crossword() {
   const puzzle = puzzleData
   const size = puzzle?.size || { rows: 0, cols: 0 }
   const grid = puzzle?.grid || []
+  const rebus = puzzle?.rebus || []
   const clues = puzzle?.clues || { across: [], down: [] }
+  const hasRebus = useMemo(
+    () => rebus.some((row) => row.some((cell) => cell !== null)),
+    [rebus]
+  )
 
   const cellNumbers = useMemo(
     () => (puzzle ? buildCellNumbers(grid, size.rows, size.cols) : []),
@@ -144,15 +150,15 @@ function Crossword() {
     [activeClue, activeDirection]
   )
 
-  // Check completion
+  // Check completion — rebus cells must match the full rebus string
   const checkCompletion = useCallback(
     (newGrid) => {
       if (!puzzle) return false
       for (let r = 0; r < size.rows; r++) {
         for (let c = 0; c < size.cols; c++) {
-          if (grid[r][c] !== '#' && newGrid[r][c] !== grid[r][c]) {
-            return false
-          }
+          if (grid[r][c] === '#') continue
+          const expected = rebus[r]?.[c] || grid[r][c]
+          if (newGrid[r][c] !== expected) return false
         }
       }
       return true
@@ -223,18 +229,28 @@ function Crossword() {
       if (!timerStarted) setTimerStarted(true)
 
       const newGrid = playerGrid.map((row) => [...row])
-      newGrid[activeCell.row][activeCell.col] = letter
+      if (rebusMode) {
+        // Append letter to current cell
+        newGrid[activeCell.row][activeCell.col] =
+          (newGrid[activeCell.row][activeCell.col] || '') + letter
+      } else {
+        newGrid[activeCell.row][activeCell.col] = letter
+      }
       setPlayerGrid(newGrid)
 
       if (checkCompletion(newGrid)) {
         setFinalTime(currentTime)
         setGamePhase('complete')
         setShowCelebration(true)
+        setRebusMode(false)
         return
       }
 
-      const next = moveToNextCell(activeCell.row, activeCell.col, activeDirection)
-      if (next) setActiveCell(next)
+      // In rebus mode, stay on the same cell
+      if (!rebusMode) {
+        const next = moveToNextCell(activeCell.row, activeCell.col, activeDirection)
+        if (next) setActiveCell(next)
+      }
     },
     [
       gamePhase,
@@ -242,6 +258,7 @@ function Crossword() {
       playerGrid,
       activeCell,
       activeDirection,
+      rebusMode,
       checkCompletion,
       moveToNextCell,
       currentTime,
@@ -259,7 +276,12 @@ function Crossword() {
         e.preventDefault()
         if (!timerStarted) setTimerStarted(true)
         const newGrid = playerGrid.map((r) => [...r])
-        if (newGrid[row][col]) {
+        const cellVal = newGrid[row][col] || ''
+        if (rebusMode && cellVal.length > 1) {
+          // In rebus mode, remove last character
+          newGrid[row][col] = cellVal.slice(0, -1)
+          setPlayerGrid(newGrid)
+        } else if (cellVal) {
           newGrid[row][col] = ''
           setPlayerGrid(newGrid)
         } else {
@@ -332,6 +354,15 @@ function Crossword() {
         }
       }
 
+      // Enter or Escape toggle rebus mode off (and advance if exiting rebus)
+      if (e.key === 'Enter' && rebusMode) {
+        e.preventDefault()
+        setRebusMode(false)
+        const next = moveToNextCell(row, col, activeDirection)
+        if (next) setActiveCell(next)
+        return
+      }
+
       if (/^[a-zA-Z]$/.test(e.key)) {
         e.preventDefault()
         handleInput(e.key.toUpperCase())
@@ -344,10 +375,12 @@ function Crossword() {
       activeClueNumber,
       playerGrid,
       timerStarted,
+      rebusMode,
       clues,
       grid,
       size,
       moveToPrevCell,
+      moveToNextCell,
       handleInput,
     ]
   )
@@ -381,6 +414,7 @@ function Crossword() {
     setGamePhase('playing')
     setActiveCell({ row: 0, col: 0 })
     setActiveDirection('across')
+    setRebusMode(false)
   }
 
   // Back to puzzle selector
@@ -392,6 +426,7 @@ function Crossword() {
     setFinalTime(null)
     setCurrentTime(0)
     setShowCelebration(false)
+    setRebusMode(false)
   }
 
   // Puzzle selection screen
@@ -526,11 +561,26 @@ function Crossword() {
             {puzzle.title || 'Crossword'}
           </h1>
         </div>
-        <CrosswordTimer
-          started={timerStarted}
-          completed={gamePhase === 'complete'}
-          onTimeUpdate={setCurrentTime}
-        />
+        <div className="flex items-center gap-2 sm:gap-3">
+          {hasRebus && gamePhase === 'playing' && (
+            <button
+              onClick={() => setRebusMode((m) => !m)}
+              className={`px-2.5 py-1 rounded text-xs sm:text-sm font-semibold font-sans border-2 transition-all duration-200 ${
+                rebusMode
+                  ? 'bg-wine text-cream-light border-wine'
+                  : 'bg-cream text-wine/70 border-wine/30 hover:border-wine/60'
+              }`}
+              title="Toggle rebus mode to enter multiple letters in one cell"
+            >
+              Rebus
+            </button>
+          )}
+          <CrosswordTimer
+            started={timerStarted}
+            completed={gamePhase === 'complete'}
+            onTimeUpdate={setCurrentTime}
+          />
+        </div>
       </div>
 
       {/* Completion overlay */}

@@ -125,9 +125,42 @@ export function parsePuz(buffer) {
     }
   }
 
+  // Parse extra sections for rebus support (GRBS + RTBL)
+  const rebus = Array.from({ length: height }, () => Array(width).fill(null));
+  const grbsPos = findSection(bytes, 'GRBS', pos);
+  if (grbsPos >= 0) {
+    const grbsLen = (bytes[grbsPos + 4]) | (bytes[grbsPos + 5] << 8);
+    const grbsData = bytes.slice(grbsPos + 8, grbsPos + 8 + grbsLen);
+    const rtblPos = findSection(bytes, 'RTBL', pos);
+    if (rtblPos >= 0) {
+      const rtblLen = (bytes[rtblPos + 4]) | (bytes[rtblPos + 5] << 8);
+      const rtblData = decodeString(bytes, rtblPos + 8, rtblPos + 8 + rtblLen);
+      // Parse RTBL: entries like " 1:ME; 2:THE;" etc.
+      const rtblMap = {};
+      for (const entry of rtblData.split(';')) {
+        const trimmed = entry.trim();
+        if (!trimmed) continue;
+        const colonIdx = trimmed.indexOf(':');
+        if (colonIdx < 0) continue;
+        const idx = parseInt(trimmed.slice(0, colonIdx).trim(), 10);
+        rtblMap[idx] = trimmed.slice(colonIdx + 1);
+      }
+      // Map GRBS grid indices to rebus strings
+      for (let r = 0; r < height; r++) {
+        for (let c = 0; c < width; c++) {
+          const val = grbsData[r * width + c];
+          if (val > 0 && rtblMap[val - 1] != null) {
+            rebus[r][c] = rtblMap[val - 1];
+          }
+        }
+      }
+    }
+  }
+
   return {
     size: { rows: height, cols: width },
     grid,
+    rebus,
     clues: { across, down },
     title,
     author,
@@ -176,6 +209,17 @@ function isAcrossStart(grid, r, c, width) {
 function isDownStart(grid, r, c, height) {
   if (grid[r][c] === '#') return false;
   return r === 0 || grid[r - 1][c] === '#';
+}
+
+/** Find an extra section by its 4-byte name tag */
+function findSection(bytes, name, startFrom) {
+  const tag = name.split('').map((ch) => ch.charCodeAt(0));
+  for (let i = startFrom; i < bytes.length - 8; i++) {
+    if (bytes[i] === tag[0] && bytes[i+1] === tag[1] && bytes[i+2] === tag[2] && bytes[i+3] === tag[3]) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 function wordLength(grid, r, c, direction, width, height) {

@@ -107,7 +107,9 @@ function CrosswordGrid({
                   </span>
                 )}
                 {!isBlack && (
-                  <span className="absolute inset-0 flex items-center justify-center font-sans font-bold text-sm sm:text-lg text-brown pointer-events-none">
+                  <span className={`absolute inset-0 flex items-center justify-center font-sans font-bold text-brown pointer-events-none ${
+                    playerLetter.length > 1 ? 'text-[0.45rem] sm:text-[0.65rem]' : 'text-sm sm:text-lg'
+                  }`}>
                     {playerLetter}
                   </span>
                 )}
