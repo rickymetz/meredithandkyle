@@ -1,9 +1,10 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { parsePuz } from '../utils/puzParser.js'
 import { PUZZLES } from '../data/puzzles.js'
 import CrosswordGrid from '../components/CrosswordGrid.jsx'
 import CrosswordClues from '../components/CrosswordClues.jsx'
 import CrosswordTimer from '../components/CrosswordTimer.jsx'
+import CrosswordKeyboard from '../components/CrosswordKeyboard.jsx'
 import Leaderboard, { MOCK_SCORES } from '../components/Leaderboard.jsx'
 
 // Build cell numbers from grid
@@ -88,23 +89,6 @@ function Crossword() {
       return JSON.parse(localStorage.getItem('crossword-results') || '{}')
     } catch { return {} }
   })
-
-  // Track keyboard height via visualViewport
-  const [keyboardOffset, setKeyboardOffset] = useState(0)
-  useEffect(() => {
-    const vv = window.visualViewport
-    if (!vv) return
-    const onResize = () => {
-      const offset = window.innerHeight - vv.height
-      setKeyboardOffset(offset > 50 ? offset : 0)
-    }
-    vv.addEventListener('resize', onResize)
-    vv.addEventListener('scroll', onResize)
-    return () => {
-      vv.removeEventListener('resize', onResize)
-      vv.removeEventListener('scroll', onResize)
-    }
-  }, [])
 
   // Hide mobile hamburger menu during gameplay
   const inGame = gamePhase === 'playing' || gamePhase === 'complete' || gamePhase === 'entry'
@@ -702,7 +686,7 @@ function Crossword() {
           {hasRebus && gamePhase === 'playing' && (
             <button
               onClick={() => setRebusMode((m) => !m)}
-              className={`px-2.5 py-1 rounded text-xs sm:text-sm font-semibold font-sans border-2 transition-all duration-200 ${
+              className={`hidden md:inline-flex px-2.5 py-1 rounded text-xs sm:text-sm font-semibold font-sans border-2 transition-all duration-200 ${
                 rebusMode
                   ? 'bg-wine text-cream-light border-wine'
                   : 'bg-cream text-wine/70 border-wine/30 hover:border-wine/60'
@@ -844,37 +828,48 @@ function Crossword() {
         )
       })()}
 
-      {/* Mobile fixed bottom clue bar */}
+      {/* Mobile fixed bottom: clue bar + custom keyboard */}
       {gamePhase === 'playing' && activeClue && (
-        <div
-          className="md:hidden fixed left-0 right-0 z-30 bg-cream-light/95 backdrop-blur-sm border-t border-cream-dark px-3 py-2.5 flex items-center gap-2 transition-[bottom] duration-100"
-          style={{ bottom: keyboardOffset }}
-        >
-          <button
-            onClick={() => navigateClue(-1)}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
-            aria-label="Previous clue"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <p className="flex-1 text-sm text-brown leading-snug min-w-0">
-            <span className="font-bold text-wine">
-              {activeClue.number}{activeDirection === 'across' ? 'A' : 'D'}
-            </span>
-            {' '}
-            {activeClue.clue}
-          </p>
-          <button
-            onClick={() => navigateClue(1)}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
-            aria-label="Next clue"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-30">
+          {/* Clue bar */}
+          <div className="bg-cream-light/95 backdrop-blur-sm border-t border-cream-dark px-3 py-2 flex items-center gap-2">
+            <button
+              onClick={() => navigateClue(-1)}
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
+              aria-label="Previous clue"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <p className="flex-1 text-sm text-brown leading-snug min-w-0">
+              <span className="font-bold text-wine">
+                {activeClue.number}{activeDirection === 'across' ? 'A' : 'D'}
+              </span>
+              {' '}
+              {activeClue.clue}
+            </p>
+            <button
+              onClick={() => navigateClue(1)}
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
+              aria-label="Next clue"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+          {/* Custom keyboard */}
+          <CrosswordKeyboard
+            onKey={(letter) => handleInput(letter)}
+            onBackspace={() => {
+              // Simulate backspace keydown
+              handleKeyDown({ key: 'Backspace', preventDefault: () => {} })
+            }}
+            rebusMode={rebusMode}
+            hasRebus={hasRebus}
+            onToggleRebus={() => setRebusMode((m) => !m)}
+          />
         </div>
       )}
     </div>

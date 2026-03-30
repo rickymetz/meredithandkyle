@@ -13,21 +13,29 @@ function CrosswordGrid({
 }) {
   const { size, grid } = puzzleData
   const gridRef = useRef(null)
-  const inputRef = useRef(null)
 
-  // Focus the hidden input whenever the grid is interacted with
-  const focusInput = useCallback(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [])
-
-  // Keep input focused when active cell changes
+  // Desktop: capture keyboard events on the grid container
   useEffect(() => {
-    if (activeCell) {
-      focusInput()
+    const el = gridRef.current
+    if (!el) return
+    const handler = (e) => {
+      if (/^[a-zA-Z]$/.test(e.key)) {
+        e.preventDefault()
+        onInput(e.key.toUpperCase())
+      } else {
+        onKeyDown(e)
+      }
     }
-  }, [activeCell, focusInput])
+    el.addEventListener('keydown', handler)
+    return () => el.removeEventListener('keydown', handler)
+  }, [onKeyDown, onInput])
+
+  // Keep grid focused for desktop keyboard input
+  useEffect(() => {
+    if (activeCell && gridRef.current) {
+      gridRef.current.focus()
+    }
+  }, [activeCell])
 
   const isActiveCell = (r, c) =>
     activeCell && activeCell.row === r && activeCell.col === c
@@ -38,40 +46,17 @@ function CrosswordGrid({
   const handleCellClick = (r, c) => {
     if (grid[r][c] === '#') return
     onCellClick(r, c)
-    focusInput()
-  }
-
-  const handleKeyDown = (e) => {
-    onKeyDown(e)
-  }
-
-  const handleInput = (e) => {
-    const val = e.target.value
-    if (val) {
-      const letter = val.slice(-1).toUpperCase()
-      if (/^[A-Z]$/.test(letter)) {
-        onInput(letter)
-      }
-      e.target.value = ''
-    }
+    if (gridRef.current) gridRef.current.focus()
   }
 
   return (
-    <div className="relative w-full" ref={gridRef}>
-      {/* Hidden input to capture mobile keyboard */}
-      <input
-        ref={inputRef}
-        type="text"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="characters"
-        spellCheck="false"
-        className="absolute opacity-0 w-0 h-0 pointer-events-none"
-        onKeyDown={handleKeyDown}
-        onInput={handleInput}
-        aria-label="Crossword input"
-      />
-
+    <div
+      className="relative w-full outline-none"
+      ref={gridRef}
+      tabIndex={0}
+      role="grid"
+      aria-label="Crossword grid"
+    >
       <div
         className="grid gap-0 w-full max-w-[min(100%,28rem)] mx-auto"
         style={{
