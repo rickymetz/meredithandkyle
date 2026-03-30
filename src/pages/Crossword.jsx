@@ -220,6 +220,28 @@ function Crossword() {
     [grid, size.rows, size.cols]
   )
 
+  // Get ordered list of all clues (across then down)
+  const allCluesOrdered = useMemo(
+    () => [...clues.across.map((c) => ({ ...c, dir: 'across' })), ...clues.down.map((c) => ({ ...c, dir: 'down' }))],
+    [clues]
+  )
+
+  // Navigate to next/previous clue
+  const navigateClue = useCallback(
+    (delta) => {
+      if (!activeClue || allCluesOrdered.length === 0) return
+      const idx = allCluesOrdered.findIndex(
+        (c) => c.number === activeClue.number && c.dir === activeDirection
+      )
+      if (idx < 0) return
+      const nextIdx = (idx + delta + allCluesOrdered.length) % allCluesOrdered.length
+      const next = allCluesOrdered[nextIdx]
+      setActiveDirection(next.dir)
+      setActiveCell({ row: next.row, col: next.col })
+    },
+    [activeClue, activeDirection, allCluesOrdered]
+  )
+
   // Handle cell click
   const handleCellClick = useCallback(
     (r, c) => {
@@ -280,7 +302,12 @@ function Crossword() {
       // In rebus mode, stay on the same cell
       if (!rebusMode) {
         const next = moveToNextCell(activeCell.row, activeCell.col, activeDirection, newGrid)
-        if (next) setActiveCell(next)
+        if (next) {
+          setActiveCell(next)
+        } else {
+          // Word is full — auto-advance to the next clue
+          navigateClue(1)
+        }
       }
     },
     [
@@ -293,6 +320,7 @@ function Crossword() {
       checkCompletion,
       checkAllFilled,
       moveToNextCell,
+      navigateClue,
       currentTime,
       completedPuzzles,
       puzzleId,
@@ -745,14 +773,32 @@ function Crossword() {
 
       {/* Mobile fixed bottom clue bar */}
       {gamePhase === 'playing' && activeClue && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-cream-light/95 backdrop-blur-sm border-t border-cream-dark px-4 py-3">
-          <p className="text-sm text-brown leading-snug">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-cream-light/95 backdrop-blur-sm border-t border-cream-dark px-3 py-2.5 flex items-center gap-2">
+          <button
+            onClick={() => navigateClue(-1)}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
+            aria-label="Previous clue"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <p className="flex-1 text-sm text-brown leading-snug min-w-0">
             <span className="font-bold text-wine">
               {activeClue.number}{activeDirection === 'across' ? 'A' : 'D'}
             </span>
             {' '}
             {activeClue.clue}
           </p>
+          <button
+            onClick={() => navigateClue(1)}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
+            aria-label="Next clue"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       )}
     </div>
