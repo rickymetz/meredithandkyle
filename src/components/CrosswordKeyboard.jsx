@@ -6,9 +6,9 @@ const ROWS = [
 
 function CrosswordKeyboard({ onKey, onBackspace, rebusMode, hasRebus, onToggleRebus }) {
   return (
-    <div className="md:hidden w-full bg-cream-dark/60 border-t border-cream-dark px-1 pt-1.5 pb-[env(safe-area-inset-bottom,0.375rem)] select-none">
+    <div className="md:hidden w-full bg-cream px-1.5 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] select-none">
       {ROWS.map((row, i) => (
-        <div key={i} className="flex justify-center gap-[3px] mb-[3px]">
+        <div key={i} className="flex justify-center gap-[4px] mb-[5px]">
           {i === 2 && hasRebus && (
             <button
               type="button"

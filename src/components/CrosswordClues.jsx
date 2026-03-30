@@ -57,8 +57,8 @@ function CrosswordClues({
 
   return (
     <div className="w-full">
-      {/* Mobile compact strip */}
-      <div className="md:hidden">
+      {/* Mobile compact strip — hidden during gameplay since the fixed bottom bar handles this */}
+      <div className="hidden">
         <button
           onClick={() => setExpanded(!expanded)}
           className="w-full text-left bg-cream border border-cream-dark rounded-lg px-3 py-2.5 mb-2 flex items-center gap-2"

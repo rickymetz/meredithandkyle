@@ -665,7 +665,7 @@ function Crossword() {
   if (!puzzle) return null
 
   return (
-    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 pb-24 md:pb-8">
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 pb-64 md:pb-8">
       {/* Header row: title + timer */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center gap-3">
