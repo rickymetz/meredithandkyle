@@ -63,6 +63,13 @@ function fmtTime(s) {
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 }
 
+function firstWhiteCell(g, rows, cols) {
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      if (g[r][c] !== '#') return { row: r, col: c }
+  return { row: 0, col: 0 }
+}
+
 function Crossword() {
   // Puzzle loading
   const [puzzleId, setPuzzleId] = useState(null)
@@ -142,16 +149,7 @@ function Crossword() {
             Array(data.size.cols).fill('')
           )
         )
-        // Find first non-black cell
-        for (let r = 0; r < data.size.rows; r++) {
-          for (let c = 0; c < data.size.cols; c++) {
-            if (data.grid[r][c] !== '#') {
-              setActiveCell({ row: r, col: c })
-              break
-            }
-          }
-          if (data.grid[0]?.[0] !== '#') break
-        }
+        setActiveCell(firstWhiteCell(data.grid, data.size.rows, data.size.cols))
         setActiveDirection('across')
         setTimerStarted(false)
         setFinalTime(null)
@@ -516,7 +514,7 @@ function Crossword() {
     setShowCelebration(false)
     setShowIncorrect(false)
     setGamePhase('playing')
-    setActiveCell({ row: 0, col: 0 })
+    setActiveCell(firstWhiteCell(grid, size.rows, size.cols))
     setActiveDirection('across')
     setRebusMode(false)
   }
