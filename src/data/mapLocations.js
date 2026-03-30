@@ -1,0 +1,96 @@
+export const londonLocations = [
+  {
+    name: 'The Old Marylebone Town Hall',
+    address: 'Marylebone Road, London, UK',
+    coordinates: [-0.1566, 51.5225],
+    description: 'Ceremony & Photos',
+    category: 'event',
+  },
+  {
+    name: '67 Pall Mall',
+    address: '67 Pall Mall, London, UK',
+    coordinates: [-0.1367, 51.5069],
+    description: 'Family Dinner',
+    category: 'event',
+  },
+  {
+    name: 'The Langham, London',
+    address: '1C Portland Place, Regent Street, London, UK',
+    coordinates: [-0.1440, 51.5184],
+    description: 'Luxury hotel near Marylebone',
+    category: 'hotel',
+  },
+  {
+    name: 'The Zetter Townhouse Marylebone',
+    address: '28-30 Seymour Street, London, UK',
+    coordinates: [-0.1592, 51.5152],
+    description: 'Boutique hotel in Marylebone',
+    category: 'hotel',
+  },
+  {
+    name: 'Regent\'s Park',
+    address: 'Chester Road, London, UK',
+    coordinates: [-0.1527, 51.5273],
+    description: 'Beautiful royal park, perfect for a morning stroll',
+    category: 'attraction',
+  },
+  {
+    name: 'The Wallace Collection',
+    address: 'Hertford House, Manchester Square, London, UK',
+    coordinates: [-0.1530, 51.5170],
+    description: 'World-class art collection in a historic townhouse',
+    category: 'attraction',
+  },
+  {
+    name: 'Borough Market',
+    address: '8 Southwark Street, London, UK',
+    coordinates: [-0.0910, 51.5055],
+    description: 'Iconic food market with artisan vendors',
+    category: 'attraction',
+  },
+]
+
+export const toledoLocations = [
+  {
+    name: 'Cigarral de las Mercedes',
+    address: 'Carretera Piedrabuena, Toledo, Spain',
+    coordinates: [-4.0376, 39.8500],
+    description: 'Welcome Party, Cocktails, Reception & Dancing',
+    category: 'event',
+  },
+  {
+    name: 'Hotel Cigarral El Bosque',
+    address: 'Carretera de Navalpino, km 3, Toledo, Spain',
+    coordinates: [-4.0450, 39.8530],
+    description: 'Charming hotel with panoramic views of Toledo',
+    category: 'hotel',
+  },
+  {
+    name: 'Parador de Toledo',
+    address: 'Cerro del Emperador, Toledo, Spain',
+    coordinates: [-4.0350, 39.8560],
+    description: 'Historic hilltop hotel overlooking the old city',
+    category: 'hotel',
+  },
+  {
+    name: 'Toledo Cathedral',
+    address: 'Calle Cardenal Cisneros 1, Toledo, Spain',
+    coordinates: [-4.0237, 39.8568],
+    description: 'Stunning 13th-century Gothic cathedral',
+    category: 'attraction',
+  },
+  {
+    name: 'Alcazar of Toledo',
+    address: 'Calle de la Union, Toledo, Spain',
+    coordinates: [-4.0197, 39.8578],
+    description: 'Historic stone fortification on the highest point of Toledo',
+    category: 'attraction',
+  },
+  {
+    name: 'Mirador del Valle',
+    address: 'Carretera de Piedrabuena, Toledo, Spain',
+    coordinates: [-4.0340, 39.8490],
+    description: 'Panoramic viewpoint with breathtaking views of the old city',
+    category: 'attraction',
+  },
+]
