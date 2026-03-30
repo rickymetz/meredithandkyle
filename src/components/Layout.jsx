@@ -80,15 +80,17 @@ function Layout() {
         <Outlet />
       </main>
 
-      {/* Mobile floating RSVP button */}
-      <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
-        <NavLink
-          to="/rsvp"
-          className="block py-3 px-8 rounded-full border-2 border-wine bg-cream-light/95 backdrop-blur-sm text-wine font-sans font-semibold tracking-wide shadow-lg hover:bg-wine hover:text-cream-light transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-        >
-          RSVP
-        </NavLink>
-      </div>
+      {/* Mobile floating RSVP button - hidden on crossword page */}
+      {location.pathname !== '/crossword' && (
+        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
+          <NavLink
+            to="/rsvp"
+            className="block py-3 px-8 rounded-full border-2 border-wine bg-cream-light/95 backdrop-blur-sm text-wine font-sans font-semibold tracking-wide shadow-lg hover:bg-wine hover:text-cream-light transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+          >
+            RSVP
+          </NavLink>
+        </div>
+      )}
     </div>
   )
 }

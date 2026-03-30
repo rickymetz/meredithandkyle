@@ -742,6 +742,19 @@ function Crossword() {
           </div>
         )
       })()}
+
+      {/* Mobile fixed bottom clue bar */}
+      {gamePhase === 'playing' && activeClue && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-cream-light/95 backdrop-blur-sm border-t border-cream-dark px-4 py-3">
+          <p className="text-sm text-brown leading-snug">
+            <span className="font-bold text-wine">
+              {activeClue.number}{activeDirection === 'across' ? 'A' : 'D'}
+            </span>
+            {' '}
+            {activeClue.clue}
+          </p>
+        </div>
+      )}
     </div>
   )
 }
