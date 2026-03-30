@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { parsePuz } from '../utils/puzParser.js'
 import { PUZZLES } from '../data/puzzles.js'
 import CrosswordGrid from '../components/CrosswordGrid.jsx'
@@ -88,6 +88,23 @@ function Crossword() {
       return JSON.parse(localStorage.getItem('crossword-results') || '{}')
     } catch { return {} }
   })
+
+  // Track keyboard height via visualViewport
+  const [keyboardOffset, setKeyboardOffset] = useState(0)
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const onResize = () => {
+      const offset = window.innerHeight - vv.height
+      setKeyboardOffset(offset > 50 ? offset : 0)
+    }
+    vv.addEventListener('resize', onResize)
+    vv.addEventListener('scroll', onResize)
+    return () => {
+      vv.removeEventListener('resize', onResize)
+      vv.removeEventListener('scroll', onResize)
+    }
+  }, [])
 
   // Hide mobile hamburger menu during gameplay
   const inGame = gamePhase === 'playing' || gamePhase === 'complete' || gamePhase === 'entry'
@@ -829,7 +846,10 @@ function Crossword() {
 
       {/* Mobile fixed bottom clue bar */}
       {gamePhase === 'playing' && activeClue && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-cream-light/95 backdrop-blur-sm border-t border-cream-dark px-3 py-2.5 flex items-center gap-2">
+        <div
+          className="md:hidden fixed left-0 right-0 z-30 bg-cream-light/95 backdrop-blur-sm border-t border-cream-dark px-3 py-2.5 flex items-center gap-2 transition-[bottom] duration-100"
+          style={{ bottom: keyboardOffset }}
+        >
           <button
             onClick={() => navigateClue(-1)}
             className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-wine/60 active:bg-wine/10 transition-colors"
