@@ -67,7 +67,9 @@ function Crossword() {
 
   // Game state
   const [gamePhase, setGamePhase] = useState('select') // select | entry | playing | complete
-  const [playerName, setPlayerName] = useState('')
+  const [playerName, setPlayerName] = useState(() => {
+    try { return localStorage.getItem('crossword-player-name') || '' } catch { return '' }
+  })
   const [playerGrid, setPlayerGrid] = useState([])
   const [activeCell, setActiveCell] = useState({ row: 0, col: 0 })
   const [activeDirection, setActiveDirection] = useState('across')
@@ -362,6 +364,7 @@ function Crossword() {
   // Start game
   const handleStart = () => {
     if (!playerName.trim()) return
+    try { localStorage.setItem('crossword-player-name', playerName.trim()) } catch {}
     setGamePhase('playing')
   }
 
@@ -492,10 +495,12 @@ function Crossword() {
 
         <button
           onClick={handleChangePuzzle}
-          className="text-sm text-brown/50 hover:text-wine transition-colors font-sans"
+          className="text-sm text-brown/50 hover:text-wine transition-colors font-sans mb-8"
         >
           &larr; Choose a different puzzle
         </button>
+
+        <Leaderboard puzzleId={puzzleId} />
       </div>
     )
   }
