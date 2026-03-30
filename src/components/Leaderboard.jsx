@@ -1,4 +1,4 @@
-const MOCK_SCORES = {
+export const MOCK_SCORES = {
   mini: [
     { name: 'Meredith', time: 42, date: '2026-03-28' },
     { name: 'Kyle', time: 55, date: '2026-03-28' },

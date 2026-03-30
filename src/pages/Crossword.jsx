@@ -4,7 +4,7 @@ import { PUZZLES } from '../data/puzzles.js'
 import CrosswordGrid from '../components/CrosswordGrid.jsx'
 import CrosswordClues from '../components/CrosswordClues.jsx'
 import CrosswordTimer from '../components/CrosswordTimer.jsx'
-import Leaderboard from '../components/Leaderboard.jsx'
+import Leaderboard, { MOCK_SCORES } from '../components/Leaderboard.jsx'
 
 // Build cell numbers from grid
 function buildCellNumbers(grid, rows, cols) {
@@ -78,6 +78,7 @@ function Crossword() {
   const [currentTime, setCurrentTime] = useState(0)
   const [showCelebration, setShowCelebration] = useState(false)
   const [rebusMode, setRebusMode] = useState(false)
+  const [showIncorrect, setShowIncorrect] = useState(false)
 
   // Load a puzzle from .puz file
   const loadPuzzle = useCallback(async (id) => {
@@ -166,6 +167,20 @@ function Crossword() {
     [grid, size.rows, size.cols, puzzle]
   )
 
+  // Check if all non-black cells are filled
+  const checkAllFilled = useCallback(
+    (newGrid) => {
+      if (!puzzle) return false
+      for (let r = 0; r < size.rows; r++) {
+        for (let c = 0; c < size.cols; c++) {
+          if (grid[r][c] !== '#' && !newGrid[r][c]) return false
+        }
+      }
+      return true
+    },
+    [grid, size.rows, size.cols, puzzle]
+  )
+
   // Move to next cell in current word
   const moveToNextCell = useCallback(
     (row, col, dir) => {
@@ -243,7 +258,15 @@ function Crossword() {
         setGamePhase('complete')
         setShowCelebration(true)
         setRebusMode(false)
+        setShowIncorrect(false)
         return
+      }
+
+      // All filled but not correct — nudge the player
+      if (checkAllFilled(newGrid)) {
+        setShowIncorrect(true)
+      } else {
+        setShowIncorrect(false)
       }
 
       // In rebus mode, stay on the same cell
@@ -260,6 +283,7 @@ function Crossword() {
       activeDirection,
       rebusMode,
       checkCompletion,
+      checkAllFilled,
       moveToNextCell,
       currentTime,
     ]
@@ -411,6 +435,7 @@ function Crossword() {
     setFinalTime(null)
     setCurrentTime(0)
     setShowCelebration(false)
+    setShowIncorrect(false)
     setGamePhase('playing')
     setActiveCell({ row: 0, col: 0 })
     setActiveDirection('across')
@@ -422,6 +447,7 @@ function Crossword() {
     setPuzzleData(null)
     setPuzzleId(null)
     setGamePhase('select')
+    setShowIncorrect(false)
     setTimerStarted(false)
     setFinalTime(null)
     setCurrentTime(0)
@@ -583,38 +609,55 @@ function Crossword() {
         </div>
       </div>
 
-      {/* Completion overlay */}
-      {showCelebration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 backdrop-blur-sm px-4">
-          <div className="bg-cream-light border-2 border-wine rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-xl animate-[fadeIn_0.4s_ease-out]">
-            <div className="text-4xl mb-3">&#127881;</div>
-            <h2 className="font-serif text-2xl sm:text-3xl text-wine mb-2">
-              Congratulations!
-            </h2>
-            <p className="text-brown/70 mb-1 text-sm">
-              {playerName}, you completed the puzzle in
-            </p>
-            <p className="font-mono text-3xl font-bold text-wine mb-6">
-              {String(Math.floor((finalTime || currentTime) / 60)).padStart(2, '0')}:
-              {String((finalTime || currentTime) % 60).padStart(2, '0')}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowCelebration(false)}
-                className="flex-1 py-2.5 px-4 rounded-lg border-2 border-wine text-wine font-semibold text-sm hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-              >
-                View Board
-              </button>
-              <button
-                onClick={handlePlayAgain}
-                className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-              >
-                Play Again
-              </button>
-            </div>
-          </div>
+      {/* Incorrect answer banner */}
+      {showIncorrect && gamePhase === 'playing' && (
+        <div className="mb-3 px-4 py-3 rounded-lg bg-maroon/10 border border-maroon/30 text-brown text-sm text-center animate-[fadeIn_0.3s_ease-out]">
+          Not quite right — keep trying!
         </div>
       )}
+
+      {/* Completion overlay */}
+      {showCelebration && (() => {
+        const time = finalTime || currentTime
+        const existing = MOCK_SCORES[puzzleId] || []
+        const rank = existing.filter((s) => s.time < time).length + 1
+        const total = existing.length + 1
+        const ordinal = rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 backdrop-blur-sm px-4">
+            <div className="bg-cream-light border-2 border-wine rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-xl animate-[fadeIn_0.4s_ease-out]">
+              <div className="text-4xl mb-3">&#127881;</div>
+              <h2 className="font-serif text-2xl sm:text-3xl text-wine mb-2">
+                Congratulations!
+              </h2>
+              <p className="text-brown/70 mb-1 text-sm">
+                {playerName}, you completed the puzzle in
+              </p>
+              <p className="font-mono text-3xl font-bold text-wine mb-2">
+                {String(Math.floor(time / 60)).padStart(2, '0')}:
+                {String(time % 60).padStart(2, '0')}
+              </p>
+              <p className="text-brown/60 text-sm mb-6">
+                {ordinal} place out of {total}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCelebration(false)}
+                  className="flex-1 py-2.5 px-4 rounded-lg border-2 border-wine text-wine font-semibold text-sm hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+                >
+                  View Board
+                </button>
+                <button
+                  onClick={handlePlayAgain}
+                  className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+                >
+                  Play Again
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Main layout: grid + clues */}
       <div className="md:grid md:grid-cols-[1fr_16rem] lg:grid-cols-[1fr_20rem] md:gap-6">
