@@ -186,21 +186,21 @@ function Crossword() {
     [grid, size.rows, size.cols, puzzle]
   )
 
-  // Move to next cell in current word
+  // Move to next unfilled cell in current word, skipping filled cells
   const moveToNextCell = useCallback(
-    (row, col, dir) => {
+    (row, col, dir, currentGrid) => {
+      const g = currentGrid || playerGrid
       let nr = row
       let nc = col
-      if (dir === 'across') {
-        nc++
-        if (nc >= size.cols || grid[nr][nc] === '#') return null
-      } else {
-        nr++
-        if (nr >= size.rows || grid[nr][nc] === '#') return null
+      while (true) {
+        if (dir === 'across') nc++
+        else nr++
+        if (dir === 'across' && (nc >= size.cols || grid[nr][nc] === '#')) return null
+        if (dir === 'down' && (nr >= size.rows || grid[nr][nc] === '#')) return null
+        if (!g[nr]?.[nc]) return { row: nr, col: nc }
       }
-      return { row: nr, col: nc }
     },
-    [grid, size.rows, size.cols]
+    [grid, size.rows, size.cols, playerGrid]
   )
 
   // Move to previous cell in current word
@@ -279,7 +279,7 @@ function Crossword() {
 
       // In rebus mode, stay on the same cell
       if (!rebusMode) {
-        const next = moveToNextCell(activeCell.row, activeCell.col, activeDirection)
+        const next = moveToNextCell(activeCell.row, activeCell.col, activeDirection, newGrid)
         if (next) setActiveCell(next)
       }
     },
