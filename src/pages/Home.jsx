@@ -57,7 +57,7 @@ function Home() {
 
           <Link
             to="/schedule"
-            className="inline-flex items-center gap-2 bg-wine text-cream px-8 py-4 rounded-full font-sans text-sm sm:text-base tracking-wide uppercase hover:bg-maroon transition-colors duration-300 shadow-lg"
+            className="inline-flex items-center gap-2 bg-wine text-cream px-8 py-3.5 rounded-full font-sans font-semibold text-sm sm:text-base tracking-wide uppercase hover:bg-maroon hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -91,7 +91,7 @@ function Home() {
 
           <Link
             to="/registry"
-            className="inline-block border-2 border-wine text-wine px-8 py-3 rounded-full font-sans text-sm sm:text-base tracking-wide uppercase hover:bg-wine hover:text-cream transition-colors duration-300"
+            className="inline-block border-2 border-wine text-wine px-8 py-3 rounded-full font-sans font-semibold text-sm sm:text-base tracking-wide uppercase hover:bg-wine hover:text-cream hover:scale-[1.02] hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream"
           >
             View Registry
           </Link>

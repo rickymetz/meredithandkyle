@@ -1,109 +1,108 @@
-import { useEffect, useRef } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import { useEffect } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 
-const MAPBOX_TOKEN =
-  import.meta.env.VITE_MAPBOX_TOKEN || 'YOUR_MAPBOX_TOKEN_HERE'
+// Custom marker icon matching wine/maroon theme
+function createMarkerIcon(category) {
+  const colors = {
+    event: '#5c1a1a',
+    hotel: '#8B6914',
+    attraction: '#4a2c2a',
+  }
+  const color = colors[category] || colors.event
 
-const CATEGORY_COLORS = {
-  event: '#722F37',   // wine/maroon
-  hotel: '#8B6914',   // gold-ish brown
-  attraction: '#6B4226', // brown
+  return L.divIcon({
+    className: '',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16],
+    html: `<div style="
+      width: 28px;
+      height: 28px;
+      background: ${color};
+      border: 3px solid #faf3e6;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    "></div>`,
+  })
 }
 
-function MapView({ center, zoom, markers = [], style = 'mapbox://styles/mapbox/light-v11' }) {
-  const mapContainer = useRef(null)
-  const mapRef = useRef(null)
-  const markersRef = useRef([])
-
+// Component to fly to new center when city changes
+function FlyToCenter({ center, zoom }) {
+  const map = useMap()
   useEffect(() => {
-    if (mapRef.current) return
+    map.flyTo(center, zoom, { duration: 1.2 })
+  }, [map, center, zoom])
+  return null
+}
 
-    mapboxgl.accessToken = MAPBOX_TOKEN
-
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style,
-      center,
-      zoom,
-    })
-
-    mapRef.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
-
-    return () => {
-      mapRef.current?.remove()
-      mapRef.current = null
+// Inject CSS to desaturate + warm-tint the map tiles
+const STYLE_ID = 'leaflet-cream-style'
+function injectMapStyle() {
+  if (document.getElementById(STYLE_ID)) return
+  const style = document.createElement('style')
+  style.id = STYLE_ID
+  style.textContent = `
+    .leaflet-tile-pane {
+      filter: saturate(0.3) sepia(0.25) brightness(1.05) contrast(0.95);
     }
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-family: 'Inter', sans-serif;
+    }
+    .leaflet-popup-tip {
+      box-shadow: none;
+    }
+    .leaflet-control-zoom a {
+      color: #5c1a1a !important;
+      border-color: #e8d5a8 !important;
+    }
+    .leaflet-control-zoom a:hover {
+      background: #faf3e6 !important;
+    }
+  `
+  document.head.appendChild(style)
+}
+
+function MapView({ center, zoom, markers = [] }) {
+  useEffect(() => {
+    injectMapStyle()
   }, [])
 
-  // Update markers when data changes
-  useEffect(() => {
-    if (!mapRef.current) return
-
-    const addMarkers = () => {
-      // Clear existing markers
-      markersRef.current.forEach((m) => m.remove())
-      markersRef.current = []
-
-      markers.forEach((loc) => {
-        // Custom marker element
-        const el = document.createElement('div')
-        el.className = 'mapview-marker'
-        const color = CATEGORY_COLORS[loc.category] || CATEGORY_COLORS.event
-        el.style.cssText = `
-          width: 28px;
-          height: 28px;
-          background-color: ${color};
-          border: 3px solid #FAF6F0;
-          border-radius: 50%;
-          cursor: pointer;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-          transition: transform 0.15s ease;
-        `
-        el.addEventListener('mouseenter', () => {
-          el.style.transform = 'scale(1.2)'
-        })
-        el.addEventListener('mouseleave', () => {
-          el.style.transform = 'scale(1)'
-        })
-
-        // Popup
-        const popup = new mapboxgl.Popup({ offset: 18, closeButton: false })
-          .setHTML(
-            `<div style="font-family: 'Inter', sans-serif; padding: 4px 2px;">
-              <strong style="font-family: 'Playfair Display', serif; color: #722F37; font-size: 14px;">${loc.name}</strong>
-              <p style="margin: 4px 0 0; font-size: 12px; color: #5C4033;">${loc.address}</p>
-            </div>`
-          )
-
-        const marker = new mapboxgl.Marker({ element: el })
-          .setLngLat(loc.coordinates)
-          .setPopup(popup)
-          .addTo(mapRef.current)
-
-        markersRef.current.push(marker)
-      })
-    }
-
-    // If map is already loaded, add immediately; otherwise wait
-    if (mapRef.current.loaded()) {
-      addMarkers()
-    } else {
-      mapRef.current.on('load', addMarkers)
-    }
-  }, [markers])
-
-  // Fly to new center when it changes
-  useEffect(() => {
-    if (!mapRef.current) return
-    mapRef.current.flyTo({ center, zoom, duration: 1200 })
-  }, [center, zoom])
-
   return (
-    <div
-      ref={mapContainer}
-      className="w-full h-[60vh] md:h-[50vh] rounded-lg overflow-hidden shadow-md border border-cream-dark"
-    />
+    <MapContainer
+      center={center}
+      zoom={zoom}
+      scrollWheelZoom={false}
+      className="w-full h-[60vh] md:h-[50vh] rounded-lg overflow-hidden shadow-md border border-cream-dark z-0"
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <FlyToCenter center={center} zoom={zoom} />
+
+      {markers.map((loc) => (
+        <Marker
+          key={loc.name}
+          position={[loc.coordinates[1], loc.coordinates[0]]}
+          icon={createMarkerIcon(loc.category)}
+        >
+          <Popup>
+            <div style={{ padding: '2px 0' }}>
+              <strong style={{ fontFamily: "'Playfair Display', serif", color: '#5c1a1a', fontSize: '14px' }}>
+                {loc.name}
+              </strong>
+              <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#4a2c2a' }}>
+                {loc.address}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   )
 }
 

@@ -89,8 +89,8 @@ function CrosswordGrid({
 
             let bgClass = 'bg-white'
             if (isBlack) bgClass = 'bg-charcoal'
-            else if (isActive) bgClass = 'bg-gold/50'
-            else if (isWord) bgClass = 'bg-gold/20'
+            else if (isActive) bgClass = 'bg-wine/20'
+            else if (isWord) bgClass = 'bg-maroon/10'
 
             return (
               <div
@@ -112,7 +112,7 @@ function CrosswordGrid({
                   </span>
                 )}
                 {isActive && !isBlack && (
-                  <div className="absolute inset-0 ring-2 ring-gold ring-inset pointer-events-none" />
+                  <div className="absolute inset-0 ring-2 ring-wine ring-inset pointer-events-none" />
                 )}
               </div>
             )

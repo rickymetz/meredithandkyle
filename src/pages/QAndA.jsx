@@ -23,15 +23,19 @@ const faqs = [
   },
 ]
 
-function AccordionItem({ question, answer }) {
+function AccordionItem({ question, answer, index }) {
   const [open, setOpen] = useState(false)
+  const buttonId = `faq-button-${index}`
+  const panelId = `faq-panel-${index}`
 
   return (
     <div className="border-b border-cream-dark">
       <button
+        id={buttonId}
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 px-1 text-left focus:outline-none group"
+        className="w-full flex items-center justify-between py-5 px-1 text-left focus:outline-none focus:ring-2 focus:ring-wine/30 focus:ring-offset-2 focus:ring-offset-cream-light rounded-md group"
         aria-expanded={open}
+        aria-controls={panelId}
       >
         <span className="font-sans font-medium text-brown text-base md:text-lg pr-4">
           {question}
@@ -44,12 +48,16 @@ function AccordionItem({ question, answer }) {
           stroke="currentColor"
           viewBox="0 0 24 24"
           strokeWidth={2}
+          aria-hidden="true"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       <div
+        id={panelId}
+        role="region"
+        aria-labelledby={buttonId}
         className={`overflow-hidden transition-all duration-200 ${
           open ? 'max-h-96 pb-5' : 'max-h-0'
         }`}
@@ -64,14 +72,14 @@ function AccordionItem({ question, answer }) {
 
 function QAndA() {
   return (
-    <div className="max-w-2xl mx-auto px-6 py-16 md:py-24">
+    <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
       <h1 className="font-serif text-4xl md:text-5xl text-wine text-center mb-12">
         Q &amp; A
       </h1>
 
       <div className="border-t border-cream-dark">
-        {faqs.map((faq) => (
-          <AccordionItem key={faq.question} question={faq.question} answer={faq.answer} />
+        {faqs.map((faq, i) => (
+          <AccordionItem key={faq.question} question={faq.question} answer={faq.answer} index={i} />
         ))}
       </div>
     </div>

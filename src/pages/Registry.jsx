@@ -1,3 +1,5 @@
+import { EXTERNAL_LINKS } from '../config/links.js'
+
 function Registry() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
@@ -45,10 +47,10 @@ function Registry() {
       {/* CTA button */}
       <div className="text-center">
         <a
-          href="https://withjoy.com/esquizheng-party"
+          href={EXTERNAL_LINKS.registry}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block py-3 px-10 rounded-full border-2 border-brown text-brown font-sans font-semibold tracking-wide hover:bg-brown hover:text-cream-light transition-colors"
+          className="inline-block py-3 px-10 rounded-full border-2 border-wine text-wine font-sans font-semibold tracking-wide hover:bg-wine hover:text-cream-light hover:scale-[1.02] hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
         >
           View Registry
         </a>

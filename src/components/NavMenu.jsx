@@ -56,7 +56,7 @@ function NavMenu({ mobile = false, onClose }) {
             <NavLink
               to="/rsvp"
               onClick={onClose}
-              className="block text-center py-3 px-6 rounded-full border-2 border-brown text-brown font-sans font-semibold tracking-wide hover:bg-brown hover:text-cream-light transition-colors"
+              className="block text-center py-3 px-6 rounded-full border-2 border-wine text-wine font-sans font-semibold tracking-wide hover:bg-wine hover:text-cream-light transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
             >
               RSVP
             </NavLink>
@@ -78,7 +78,7 @@ function NavMenu({ mobile = false, onClose }) {
           ))}
           <NavLink
             to="/rsvp"
-            className="ml-3 py-1.5 px-5 rounded-full border-2 border-brown text-brown text-sm font-sans font-semibold tracking-wide hover:bg-brown hover:text-cream-light transition-colors"
+            className="ml-3 py-1.5 px-5 rounded-full border-2 border-wine text-wine text-sm font-sans font-semibold tracking-wide hover:bg-wine hover:text-cream-light transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
           >
             RSVP
           </NavLink>

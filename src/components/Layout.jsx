@@ -39,7 +39,7 @@ function Layout() {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-brown bg-cream-light/95 backdrop-blur-sm text-brown hover:bg-cream transition-colors"
+          className="flex items-center justify-center w-11 h-11 rounded-full border-2 border-brown bg-cream-light/95 backdrop-blur-sm text-brown hover:bg-cream transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
         >
@@ -68,10 +68,9 @@ function Layout() {
 
       {/* Mobile slide-out panel */}
       <div
-        className={`md:hidden fixed top-0 left-0 z-45 h-full w-72 bg-cream-light shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`md:hidden fixed top-0 left-0 z-40 h-full w-72 bg-cream-light shadow-xl transform transition-transform duration-300 ease-in-out ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ zIndex: 45 }}
       >
         <NavMenu mobile onClose={() => setMenuOpen(false)} />
       </div>
@@ -85,7 +84,7 @@ function Layout() {
       <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
         <NavLink
           to="/rsvp"
-          className="block py-3 px-8 rounded-full border-2 border-brown bg-cream-light/95 backdrop-blur-sm text-brown font-sans font-semibold tracking-wide shadow-lg hover:bg-brown hover:text-cream-light transition-colors"
+          className="block py-3 px-8 rounded-full border-2 border-wine bg-cream-light/95 backdrop-blur-sm text-wine font-sans font-semibold tracking-wide shadow-lg hover:bg-wine hover:text-cream-light transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
         >
           RSVP
         </NavLink>

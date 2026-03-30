@@ -59,18 +59,14 @@ function Leaderboard({ currentPlayerName, currentPlayerTime }) {
               key={`${score.name}-${i}`}
               className={`grid grid-cols-[2.5rem_1fr_4.5rem_4.5rem] sm:grid-cols-[3rem_1fr_5rem_5rem] px-3 py-2.5 border-t border-cream-dark/30 text-sm sm:text-base transition-colors ${
                 isCurrent
-                  ? 'bg-gold/20 font-semibold text-brown'
+                  ? 'bg-wine/10 font-semibold text-brown'
                   : 'text-brown/80'
               }`}
             >
               <span className="flex items-center">
-                {rank <= 3 ? (
-                  <span className={`text-base ${rank === 1 ? 'text-gold' : rank === 2 ? 'text-brown-light/70' : 'text-brown-light/50'}`}>
-                    {rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}
-                  </span>
-                ) : (
-                  <span className="text-brown/50">{rank}</span>
-                )}
+                <span className={`font-serif font-bold ${rank === 1 ? 'text-wine' : rank === 2 ? 'text-brown' : rank === 3 ? 'text-brown-light' : 'text-brown/50'}`}>
+                  {rank}
+                </span>
               </span>
               <span className="truncate">
                 {score.name}

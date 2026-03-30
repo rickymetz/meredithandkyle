@@ -376,14 +376,15 @@ function Crossword() {
             onChange={(e) => setPlayerName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleStart()}
             placeholder="Enter your name"
-            className="w-full px-4 py-3 rounded-lg border border-cream-dark bg-white text-brown font-sans text-base focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold placeholder:text-brown/30"
+            maxLength={40}
+            className="w-full px-4 py-3 rounded-lg border border-cream-dark bg-white text-brown font-sans text-base focus:outline-none focus:ring-2 focus:ring-wine/30 focus:border-wine placeholder:text-brown/30"
             autoFocus
             autoComplete="off"
           />
           <button
             onClick={handleStart}
             disabled={!playerName.trim()}
-            className="mt-4 w-full py-3 px-6 rounded-lg bg-wine text-cream-light font-sans font-semibold text-base tracking-wide hover:bg-maroon transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="mt-4 w-full py-3 px-6 rounded-lg bg-wine text-cream-light font-sans font-semibold text-base tracking-wide hover:bg-maroon hover:scale-[1.01] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
           >
             Start Puzzle
           </button>
@@ -412,7 +413,7 @@ function Crossword() {
       {/* Completion overlay */}
       {showCelebration && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 backdrop-blur-sm px-4">
-          <div className="bg-cream-light border-2 border-gold rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-xl animate-[fadeIn_0.4s_ease-out]">
+          <div className="bg-cream-light border-2 border-wine rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-xl animate-[fadeIn_0.4s_ease-out]">
             <div className="text-4xl mb-3">&#127881;</div>
             <h2 className="font-serif text-2xl sm:text-3xl text-wine mb-2">
               Congratulations!
@@ -427,13 +428,13 @@ function Crossword() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowCelebration(false)}
-                className="flex-1 py-2.5 px-4 rounded-lg border-2 border-wine text-wine font-semibold text-sm hover:bg-wine/10 transition-colors"
+                className="flex-1 py-2.5 px-4 rounded-lg border-2 border-wine text-wine font-semibold text-sm hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
               >
                 View Board
               </button>
               <button
                 onClick={handlePlayAgain}
-                className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-colors"
+                className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
               >
                 Play Again
               </button>
@@ -483,7 +484,7 @@ function Crossword() {
         <div className="mt-6 text-center">
           <button
             onClick={handlePlayAgain}
-            className="py-3 px-8 rounded-lg bg-wine text-cream-light font-sans font-semibold tracking-wide hover:bg-maroon transition-colors"
+            className="py-3 px-8 rounded-lg bg-wine text-cream-light font-sans font-semibold tracking-wide hover:bg-maroon hover:scale-[1.02] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
           >
             Play Again
           </button>

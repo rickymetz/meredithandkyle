@@ -159,7 +159,7 @@ function EventCard({ event }) {
       {/* Timeline dot */}
       <div className="absolute left-0 sm:left-1 top-1.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-[3px] border-wine bg-cream-light z-10" />
 
-      <div className="bg-white rounded-2xl shadow-sm border border-cream-dark/30 p-5 sm:p-6 hover:shadow-md transition-shadow duration-300">
+      <div className="bg-cream rounded-2xl shadow-sm border border-cream-dark/50 p-5 sm:p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
         {/* Time */}
         <p className="font-sans text-sm sm:text-base font-semibold text-wine tracking-wide mb-1">
           {event.time}
@@ -217,7 +217,7 @@ function Schedule() {
   return (
     <div className="bg-cream-light min-h-screen">
       {/* Page Header */}
-      <header className="pt-16 pb-10 sm:pt-24 sm:pb-14 px-6 text-center">
+      <header className="pt-16 pb-10 md:pt-20 md:pb-14 px-6 text-center">
         <p className="text-brown-light font-sans text-sm tracking-widest uppercase mb-3">
           Four Days of Celebration
         </p>
@@ -248,7 +248,9 @@ function Schedule() {
             {/* Events */}
             <div>
               {day.events.map((event, eventIndex) => (
-                <EventCard key={eventIndex} event={event} />
+                <div key={`${day.day}-${event.name}`} className="animate-fade-up" style={{ animationDelay: `${eventIndex * 0.1}s` }}>
+                  <EventCard event={event} />
+                </div>
               ))}
             </div>
           </section>

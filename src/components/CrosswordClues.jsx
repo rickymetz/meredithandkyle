@@ -26,7 +26,7 @@ function CrosswordClues({
 
   const renderClueList = (direction, clueList) => (
     <div className="mb-4">
-      <h3 className="font-serif text-base sm:text-lg text-wine font-semibold mb-2 uppercase tracking-wide">
+      <h3 className="font-sans text-sm text-wine font-bold mb-2 uppercase tracking-wider">
         {direction}
       </h3>
       <ul className="space-y-1">
@@ -39,7 +39,7 @@ function CrosswordClues({
               ref={isActive ? (direction === 'across' ? activeAcrossRef : activeDownRef) : null}
               className={`flex gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors text-sm sm:text-base ${
                 isActive
-                  ? 'bg-gold/30 text-brown font-medium'
+                  ? 'bg-wine/15 text-brown font-medium'
                   : 'text-brown/80 hover:bg-cream-dark/40'
               }`}
               onClick={() => onClueClick(direction, clue.number)}

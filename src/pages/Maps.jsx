@@ -38,7 +38,7 @@ function Maps() {
   const attractionLocations = city.locations.filter((l) => l.category === 'attraction')
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-16">
+    <div className="max-w-4xl mx-auto px-6 py-16 md:py-20">
       <h1 className="font-serif text-3xl md:text-4xl text-wine mb-2 text-center">
         Maps & Venues
       </h1>
@@ -110,7 +110,7 @@ function LocationCard({ location, category }) {
   const badgeClass = CATEGORY_BADGE_CLASSES[category] || CATEGORY_BADGE_CLASSES.event
 
   return (
-    <div className="bg-cream rounded-lg border border-cream-dark p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-cream rounded-lg border border-cream-dark p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3 className="font-serif text-lg text-charcoal leading-snug">
           {location.name}

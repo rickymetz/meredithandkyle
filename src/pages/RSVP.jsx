@@ -1,3 +1,5 @@
+import { EXTERNAL_LINKS } from '../config/links.js'
+
 function RSVP() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-16 md:py-24 text-center">
@@ -15,10 +17,10 @@ function RSVP() {
       </p>
 
       <a
-        href="https://withjoy.com/esquizheng-party"
+        href={EXTERNAL_LINKS.rsvp}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block py-3.5 px-12 rounded-full border-2 border-wine bg-wine text-cream-light font-sans font-semibold tracking-wide text-lg hover:bg-maroon hover:border-maroon transition-colors shadow-md"
+        className="inline-block py-3.5 px-10 rounded-full bg-wine text-cream-light font-sans font-semibold tracking-wide text-base hover:bg-maroon hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
       >
         RSVP Now
       </a>
