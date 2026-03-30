@@ -441,7 +441,11 @@ function Crossword() {
           <p className="text-brown/50 text-sm animate-pulse">Loading puzzle...</p>
         )}
 
-        <Leaderboard />
+        {PUZZLES.map((p) => (
+          <div key={p.id} className="mb-6">
+            <Leaderboard puzzleId={p.id} />
+          </div>
+        ))}
       </div>
     )
   }
@@ -588,6 +592,7 @@ function Crossword() {
       {/* Leaderboard section */}
       <div className="mt-8 sm:mt-12">
         <Leaderboard
+          puzzleId={puzzleId}
           currentPlayerName={gamePhase === 'complete' ? playerName : null}
           currentPlayerTime={gamePhase === 'complete' ? (finalTime || currentTime) : null}
         />

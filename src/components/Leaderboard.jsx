@@ -1,10 +1,32 @@
-const MOCK_SCORES = [
-  { name: 'Meredith', time: 95, date: '2026-03-28' },
-  { name: 'Kyle', time: 120, date: '2026-03-28' },
-  { name: 'Sarah', time: 142, date: '2026-03-27' },
-  { name: 'James', time: 178, date: '2026-03-27' },
-  { name: 'Emily', time: 203, date: '2026-03-29' },
-]
+const MOCK_SCORES = {
+  mini: [
+    { name: 'Meredith', time: 42, date: '2026-03-28' },
+    { name: 'Kyle', time: 55, date: '2026-03-28' },
+    { name: 'Sarah', time: 68, date: '2026-03-27' },
+    { name: 'James', time: 74, date: '2026-03-27' },
+    { name: 'Emily', time: 91, date: '2026-03-29' },
+  ],
+  medium: [
+    { name: 'Kyle', time: 120, date: '2026-03-28' },
+    { name: 'Meredith', time: 138, date: '2026-03-28' },
+    { name: 'Sarah', time: 165, date: '2026-03-27' },
+    { name: 'James', time: 198, date: '2026-03-27' },
+    { name: 'Emily', time: 224, date: '2026-03-29' },
+  ],
+  full: [
+    { name: 'Meredith', time: 310, date: '2026-03-28' },
+    { name: 'Kyle', time: 385, date: '2026-03-28' },
+    { name: 'Sarah', time: 442, date: '2026-03-27' },
+    { name: 'James', time: 510, date: '2026-03-27' },
+    { name: 'Emily', time: 578, date: '2026-03-29' },
+  ],
+}
+
+const PUZZLE_LABELS = {
+  mini: 'Mini',
+  medium: 'Midi',
+  full: 'Full',
+}
 
 function formatTime(totalSeconds) {
   const m = Math.floor(totalSeconds / 60)
@@ -17,9 +39,9 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function Leaderboard({ currentPlayerName, currentPlayerTime }) {
-  // Merge current player into mock scores if they have a time
-  let scores = [...MOCK_SCORES]
+function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime }) {
+  // Get scores for the specific puzzle
+  let scores = [...(MOCK_SCORES[puzzleId] || [])]
   if (currentPlayerName && currentPlayerTime != null) {
     scores.push({
       name: currentPlayerName,
@@ -38,7 +60,7 @@ function Leaderboard({ currentPlayerName, currentPlayerTime }) {
   return (
     <div className="w-full">
       <h2 className="font-serif text-xl sm:text-2xl text-wine mb-4 text-center">
-        Leaderboard
+        {puzzleId ? `${PUZZLE_LABELS[puzzleId] || ''} Leaderboard` : 'Leaderboard'}
       </h2>
 
       <div className="bg-cream/50 border border-cream-dark rounded-lg overflow-hidden">
