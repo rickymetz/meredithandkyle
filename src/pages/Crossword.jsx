@@ -79,6 +79,11 @@ function Crossword() {
   const [showCelebration, setShowCelebration] = useState(false)
   const [rebusMode, setRebusMode] = useState(false)
   const [showIncorrect, setShowIncorrect] = useState(false)
+  const [completedPuzzles, setCompletedPuzzles] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('crossword-completed') || '[]')
+    } catch { return [] }
+  })
 
   // Load a puzzle from .puz file
   const loadPuzzle = useCallback(async (id) => {
@@ -259,6 +264,9 @@ function Crossword() {
         setShowCelebration(true)
         setRebusMode(false)
         setShowIncorrect(false)
+        const updated = [...completedPuzzles, puzzleId].filter((v, i, a) => a.indexOf(v) === i)
+        setCompletedPuzzles(updated)
+        try { localStorage.setItem('crossword-completed', JSON.stringify(updated)) } catch {}
         return
       }
 
@@ -286,6 +294,8 @@ function Crossword() {
       checkAllFilled,
       moveToNextCell,
       currentTime,
+      completedPuzzles,
+      puzzleId,
     ]
   )
 
@@ -623,6 +633,7 @@ function Crossword() {
         const rank = existing.filter((s) => s.time < time).length + 1
         const total = existing.length + 1
         const ordinal = rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`
+        const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles.includes(p.id))
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 backdrop-blur-sm px-4">
             <div className="bg-cream-light border-2 border-wine rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-xl animate-[fadeIn_0.4s_ease-out]">
@@ -647,12 +658,21 @@ function Crossword() {
                 >
                   View Board
                 </button>
-                <button
-                  onClick={handlePlayAgain}
-                  className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-                >
-                  Play Again
-                </button>
+                {nextPuzzle ? (
+                  <button
+                    onClick={() => { setShowCelebration(false); loadPuzzle(nextPuzzle.id) }}
+                    className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+                  >
+                    Try {nextPuzzle.label}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleChangePuzzle}
+                    className="flex-1 py-2.5 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+                  >
+                    All Puzzles
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -696,23 +716,32 @@ function Crossword() {
         />
       </div>
 
-      {/* Play again bar for completed state */}
-      {gamePhase === 'complete' && !showCelebration && (
-        <div className="mt-6 text-center flex justify-center gap-4">
-          <button
-            onClick={handlePlayAgain}
-            className="py-3 px-8 rounded-lg bg-wine text-cream-light font-sans font-semibold tracking-wide hover:bg-maroon hover:scale-[1.02] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
-          >
-            Play Again
-          </button>
-          <button
-            onClick={handleChangePuzzle}
-            className="py-3 px-8 rounded-lg border-2 border-wine text-wine font-sans font-semibold tracking-wide hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-          >
-            Try Another
-          </button>
-        </div>
-      )}
+      {/* Next puzzle bar for completed state */}
+      {gamePhase === 'complete' && !showCelebration && (() => {
+        const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles.includes(p.id))
+        return (
+          <div className="mt-6 text-center flex justify-center gap-4">
+            {nextPuzzle ? (
+              <button
+                onClick={() => loadPuzzle(nextPuzzle.id)}
+                className="py-3 px-8 rounded-lg bg-wine text-cream-light font-sans font-semibold tracking-wide hover:bg-maroon hover:scale-[1.02] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
+              >
+                Try the {nextPuzzle.label} Puzzle
+              </button>
+            ) : (
+              <p className="text-brown/60 font-sans text-sm">
+                You&apos;ve completed all puzzles!
+              </p>
+            )}
+            <button
+              onClick={handleChangePuzzle}
+              className="py-3 px-8 rounded-lg border-2 border-wine text-wine font-sans font-semibold tracking-wide hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+            >
+              All Puzzles
+            </button>
+          </div>
+        )
+      })()}
     </div>
   )
 }
