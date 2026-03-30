@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
-import crosswordData from '../data/crosswordData.js'
+import { parsePuz } from '../utils/puzParser.js'
+import { PUZZLES } from '../data/puzzles.js'
 import CrosswordGrid from '../components/CrosswordGrid.jsx'
 import CrosswordClues from '../components/CrosswordClues.jsx'
 import CrosswordTimer from '../components/CrosswordTimer.jsx'
@@ -58,15 +59,16 @@ function getWordCells(clue, direction) {
 }
 
 function Crossword() {
-  const puzzle = crosswordData
-  const { size, grid, clues } = puzzle
+  // Puzzle loading
+  const [puzzleId, setPuzzleId] = useState(null)
+  const [puzzleData, setPuzzleData] = useState(null)
+  const [loadError, setLoadError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   // Game state
-  const [gamePhase, setGamePhase] = useState('entry') // entry | playing | complete
+  const [gamePhase, setGamePhase] = useState('select') // select | entry | playing | complete
   const [playerName, setPlayerName] = useState('')
-  const [playerGrid, setPlayerGrid] = useState(() =>
-    Array.from({ length: size.rows }, () => Array(size.cols).fill(''))
-  )
+  const [playerGrid, setPlayerGrid] = useState([])
   const [activeCell, setActiveCell] = useState({ row: 0, col: 0 })
   const [activeDirection, setActiveDirection] = useState('across')
   const [timerStarted, setTimerStarted] = useState(false)
@@ -74,27 +76,62 @@ function Crossword() {
   const [currentTime, setCurrentTime] = useState(0)
   const [showCelebration, setShowCelebration] = useState(false)
 
-  const cellNumbers = useMemo(
-    () => buildCellNumbers(grid, size.rows, size.cols),
-    [grid, size.rows, size.cols]
-  )
+  // Load a puzzle from .puz file
+  const loadPuzzle = useCallback(async (id) => {
+    const puzzle = PUZZLES.find((p) => p.id === id)
+    if (!puzzle) return
 
-  // Skip to first non-black cell on mount
-  useEffect(() => {
-    for (let r = 0; r < size.rows; r++) {
-      for (let c = 0; c < size.cols; c++) {
-        if (grid[r][c] !== '#') {
-          setActiveCell({ row: r, col: c })
-          return
+    setLoading(true)
+    setLoadError(null)
+    try {
+      const response = await fetch(puzzle.url)
+      const buffer = await response.arrayBuffer()
+      const data = parsePuz(buffer)
+      setPuzzleData(data)
+      setPuzzleId(id)
+      setPlayerGrid(
+        Array.from({ length: data.size.rows }, () =>
+          Array(data.size.cols).fill('')
+        )
+      )
+      // Find first non-black cell
+      for (let r = 0; r < data.size.rows; r++) {
+        for (let c = 0; c < data.size.cols; c++) {
+          if (data.grid[r][c] !== '#') {
+            setActiveCell({ row: r, col: c })
+            break
+          }
         }
+        if (data.grid[0]?.[0] !== '#') break
       }
+      setActiveDirection('across')
+      setTimerStarted(false)
+      setFinalTime(null)
+      setCurrentTime(0)
+      setShowCelebration(false)
+      setGamePhase('entry')
+    } catch (err) {
+      setLoadError('Failed to load puzzle. Please try again.')
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
-  }, [grid, size.rows, size.cols])
+  }, [])
+
+  const puzzle = puzzleData
+  const size = puzzle?.size || { rows: 0, cols: 0 }
+  const grid = puzzle?.grid || []
+  const clues = puzzle?.clues || { across: [], down: [] }
+
+  const cellNumbers = useMemo(
+    () => (puzzle ? buildCellNumbers(grid, size.rows, size.cols) : []),
+    [grid, size.rows, size.cols, puzzle]
+  )
 
   // Active clue
   const activeClue = useMemo(
-    () => findClueForCell(clues, activeDirection, activeCell.row, activeCell.col),
-    [clues, activeDirection, activeCell]
+    () => (puzzle ? findClueForCell(clues, activeDirection, activeCell.row, activeCell.col) : null),
+    [clues, activeDirection, activeCell, puzzle]
   )
 
   const activeClueNumber = activeClue?.number || 1
@@ -108,6 +145,7 @@ function Crossword() {
   // Check completion
   const checkCompletion = useCallback(
     (newGrid) => {
+      if (!puzzle) return false
       for (let r = 0; r < size.rows; r++) {
         for (let c = 0; c < size.cols; c++) {
           if (grid[r][c] !== '#' && newGrid[r][c] !== grid[r][c]) {
@@ -117,7 +155,7 @@ function Crossword() {
       }
       return true
     },
-    [grid, size.rows, size.cols]
+    [grid, size.rows, size.cols, puzzle]
   )
 
   // Move to next cell in current word
@@ -158,16 +196,13 @@ function Crossword() {
   const handleCellClick = useCallback(
     (r, c) => {
       if (activeCell.row === r && activeCell.col === c) {
-        // Toggle direction
         const newDir = activeDirection === 'across' ? 'down' : 'across'
-        // Only toggle if there's a clue in that direction
         const clueInNewDir = findClueForCell(clues, newDir, r, c)
         if (clueInNewDir) {
           setActiveDirection(newDir)
         }
       } else {
         setActiveCell({ row: r, col: c })
-        // Prefer the current direction if a clue exists, otherwise switch
         const clueInCurrent = findClueForCell(clues, activeDirection, r, c)
         if (!clueInCurrent) {
           const other = activeDirection === 'across' ? 'down' : 'across'
@@ -189,7 +224,6 @@ function Crossword() {
       newGrid[activeCell.row][activeCell.col] = letter
       setPlayerGrid(newGrid)
 
-      // Check completion
       if (checkCompletion(newGrid)) {
         setFinalTime(currentTime)
         setGamePhase('complete')
@@ -197,7 +231,6 @@ function Crossword() {
         return
       }
 
-      // Move to next cell
       const next = moveToNextCell(activeCell.row, activeCell.col, activeDirection)
       if (next) setActiveCell(next)
     },
@@ -228,7 +261,6 @@ function Crossword() {
           newGrid[row][col] = ''
           setPlayerGrid(newGrid)
         } else {
-          // Move back and delete
           const prev = moveToPrevCell(row, col, activeDirection)
           if (prev) {
             newGrid[prev.row][prev.col] = ''
@@ -241,9 +273,6 @@ function Crossword() {
 
       if (e.key === 'Tab') {
         e.preventDefault()
-        // Move to next clue
-        const list = clues[activeDirection]
-        const currentIdx = list.findIndex((c) => c.number === activeClueNumber)
         const allClues = [...clues.across, ...clues.down]
         const flatIdx = allClues.findIndex(
           (c) =>
@@ -301,7 +330,6 @@ function Crossword() {
         }
       }
 
-      // Letter input via physical keyboard
       if (/^[a-zA-Z]$/.test(e.key)) {
         e.preventDefault()
         handleInput(e.key.toUpperCase())
@@ -337,8 +365,9 @@ function Crossword() {
     setGamePhase('playing')
   }
 
-  // Play again
+  // Play again (same puzzle)
   const handlePlayAgain = () => {
+    if (!puzzle) return
     setPlayerGrid(
       Array.from({ length: size.rows }, () => Array(size.cols).fill(''))
     )
@@ -351,18 +380,85 @@ function Crossword() {
     setActiveDirection('across')
   }
 
-  // Name entry screen
-  if (gamePhase === 'entry') {
+  // Back to puzzle selector
+  const handleChangePuzzle = () => {
+    setPuzzleData(null)
+    setPuzzleId(null)
+    setGamePhase('select')
+    setTimerStarted(false)
+    setFinalTime(null)
+    setCurrentTime(0)
+    setShowCelebration(false)
+  }
+
+  // Puzzle selection screen
+  if (gamePhase === 'select') {
     return (
       <div className="max-w-md mx-auto px-6 py-16 text-center">
         <h1 className="font-serif text-3xl sm:text-4xl text-wine mb-3">
-          Crossword
+          Wedding Crossword
         </h1>
-        <p className="text-brown/70 font-sans mb-8 text-sm sm:text-base">
-          Test your knowledge and race to the top of the leaderboard!
+        <p className="text-brown/70 font-sans mb-10 text-sm sm:text-base">
+          How well do you know Meredith &amp; Kyle? Pick a puzzle and race to the top!
         </p>
 
-        <div className="bg-cream/60 border border-cream-dark rounded-xl p-6 sm:p-8 mb-8">
+        <div className="space-y-4 mb-10">
+          {PUZZLES.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => loadPuzzle(p.id)}
+              disabled={loading}
+              className="w-full text-left bg-cream border border-cream-dark rounded-xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30 group"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-serif text-xl text-wine group-hover:text-maroon transition-colors">
+                    {p.label}
+                  </h3>
+                  <p className="font-sans text-sm text-brown/60 mt-0.5">
+                    {p.description}
+                  </p>
+                </div>
+                <svg
+                  className="w-5 h-5 text-wine/40 group-hover:text-wine group-hover:translate-x-1 transition-all shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {loadError && (
+          <p className="text-red-600 text-sm mb-4">{loadError}</p>
+        )}
+
+        {loading && (
+          <p className="text-brown/50 text-sm animate-pulse">Loading puzzle...</p>
+        )}
+
+        <Leaderboard />
+      </div>
+    )
+  }
+
+  // Name entry screen
+  if (gamePhase === 'entry') {
+    const selectedPuzzle = PUZZLES.find((p) => p.id === puzzleId)
+    return (
+      <div className="max-w-md mx-auto px-6 py-16 text-center">
+        <h1 className="font-serif text-3xl sm:text-4xl text-wine mb-1">
+          {puzzle?.title || 'Crossword'}
+        </h1>
+        <p className="text-brown/50 font-sans text-sm mb-6">
+          {selectedPuzzle?.description}
+        </p>
+
+        <div className="bg-cream/60 border border-cream-dark rounded-xl p-6 sm:p-8 mb-6">
           <label
             htmlFor="player-name"
             className="block text-sm font-semibold text-brown/70 mb-2 text-left"
@@ -390,19 +486,37 @@ function Crossword() {
           </button>
         </div>
 
-        <Leaderboard />
+        <button
+          onClick={handleChangePuzzle}
+          className="text-sm text-brown/50 hover:text-wine transition-colors font-sans"
+        >
+          &larr; Choose a different puzzle
+        </button>
       </div>
     )
   }
 
   // Playing / complete screen
+  if (!puzzle) return null
+
   return (
     <div className="max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 pb-24 md:pb-8">
       {/* Header row: title + timer */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h1 className="font-serif text-xl sm:text-2xl text-wine">
-          Crossword
-        </h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleChangePuzzle}
+            className="text-brown/40 hover:text-wine transition-colors"
+            aria-label="Back to puzzle selection"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="font-serif text-xl sm:text-2xl text-wine">
+            {puzzle.title || 'Crossword'}
+          </h1>
+        </div>
         <CrosswordTimer
           started={timerStarted}
           completed={gamePhase === 'complete'}
@@ -481,12 +595,18 @@ function Crossword() {
 
       {/* Play again bar for completed state */}
       {gamePhase === 'complete' && !showCelebration && (
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center flex justify-center gap-4">
           <button
             onClick={handlePlayAgain}
             className="py-3 px-8 rounded-lg bg-wine text-cream-light font-sans font-semibold tracking-wide hover:bg-maroon hover:scale-[1.02] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
           >
             Play Again
+          </button>
+          <button
+            onClick={handleChangePuzzle}
+            className="py-3 px-8 rounded-lg border-2 border-wine text-wine font-sans font-semibold tracking-wide hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+          >
+            Try Another
           </button>
         </div>
       )}
