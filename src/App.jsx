@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Home from './pages/Home.jsx'
 import Schedule from './pages/Schedule.jsx'
 import Accommodations from './pages/Accommodations.jsx'
@@ -15,15 +16,15 @@ function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/schedule" element={<Schedule />} />
-        <Route path="/accommodations" element={<Accommodations />} />
-        <Route path="/things-to-do" element={<ThingsToDo />} />
-        <Route path="/registry" element={<Registry />} />
-        <Route path="/q-and-a" element={<QAndA />} />
-        <Route path="/rsvp" element={<RSVP />} />
-        <Route path="/crossword" element={<Crossword />} />
-        <Route path="/maps" element={<Maps />} />
+        <Route path="/" element={<ErrorBoundary><Home /></ErrorBoundary>} />
+        <Route path="/schedule" element={<ErrorBoundary><Schedule /></ErrorBoundary>} />
+        <Route path="/accommodations" element={<ErrorBoundary><Accommodations /></ErrorBoundary>} />
+        <Route path="/things-to-do" element={<ErrorBoundary><ThingsToDo /></ErrorBoundary>} />
+        <Route path="/registry" element={<ErrorBoundary><Registry /></ErrorBoundary>} />
+        <Route path="/q-and-a" element={<ErrorBoundary><QAndA /></ErrorBoundary>} />
+        <Route path="/rsvp" element={<ErrorBoundary><RSVP /></ErrorBoundary>} />
+        <Route path="/crossword" element={<ErrorBoundary><Crossword /></ErrorBoundary>} />
+        <Route path="/maps" element={<ErrorBoundary><Maps /></ErrorBoundary>} />
       </Route>
     </Routes>
   )
