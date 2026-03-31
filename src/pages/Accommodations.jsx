@@ -1,10 +1,14 @@
 function Accommodations() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
-      <h1 className="font-serif text-4xl md:text-5xl text-wine text-center mb-4">
-        Accommodations
-      </h1>
-
+    <>
+      <div className="relative h-48 sm:h-64 md:h-72 overflow-hidden">
+        <img src="/photos/hero-balcony.jpg" alt="" className="w-full h-full object-cover object-center" />
+        <div className="absolute inset-0 bg-gradient-to-t from-cream-light via-cream-light/30 to-transparent" />
+        <h1 className="absolute bottom-4 sm:bottom-6 left-6 sm:left-8 font-serif text-3xl sm:text-4xl md:text-5xl text-wine drop-shadow-sm">
+          Accommodations
+        </h1>
+      </div>
+      <div className="max-w-4xl mx-auto px-6 py-10 md:py-16">
       <p className="text-brown font-sans text-center mb-12">
         Details coming soon...
       </p>
@@ -29,7 +33,8 @@ function Accommodations() {
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 
