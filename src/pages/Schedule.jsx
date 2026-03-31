@@ -164,7 +164,7 @@ function EventCard({ event }) {
       <div className="absolute left-[7px] sm:left-[11px] top-2 bottom-0 w-px bg-cream-dark group-last:hidden" />
 
       {/* Timeline dot */}
-      <div className="absolute left-0 sm:left-1 top-1.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-[3px] border-wine bg-cream-light z-10" />
+      <div className="absolute left-0 sm:left-1 top-1.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-[3px] border-wine bg-wine/20 z-10" />
 
       <div className="bg-cream rounded-2xl shadow-sm border border-cream-dark/50 p-5 sm:p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
         {/* Time */}
@@ -230,7 +230,7 @@ function Schedule() {
           alt="Meredith and Kyle"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-cream-light via-cream-light/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-cream-light via-cream-light/40 to-transparent" />
         <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 md:bottom-10 md:left-10">
           <p className="text-brown-light font-sans text-sm tracking-widest uppercase mb-2 drop-shadow-sm">
             Four Days of Celebration

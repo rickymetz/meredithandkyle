@@ -3,7 +3,7 @@ import { EXTERNAL_LINKS } from '../config/links.js'
 function Registry() {
   return (
     <>
-      <div className="relative h-48 sm:h-64 md:h-72 overflow-hidden">
+      <div className="relative h-36 sm:h-56 md:h-72 overflow-hidden">
         <img src="/photos/hero-street.jpg" alt="" className="w-full h-full object-cover object-center" />
         <div className="absolute inset-0 bg-gradient-to-t from-cream-light via-cream-light/30 to-transparent" />
         <h1 className="absolute bottom-4 sm:bottom-6 left-6 sm:left-8 font-serif text-3xl sm:text-4xl md:text-5xl text-wine drop-shadow-sm">
@@ -23,8 +23,8 @@ function Registry() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
         {/* House Fund card */}
         <div className="rounded-xl border border-cream-dark bg-cream overflow-hidden">
-          <div className="aspect-[4/3] bg-cream-dark flex items-center justify-center">
-            <img src="/sketches/5 stoop.png" alt="" className="w-16 h-16 sm:w-20 sm:h-20 object-contain opacity-50" />
+          <div className="aspect-[3/2] bg-cream-dark/50 flex items-center justify-center">
+            <img src="/sketches/5 stoop.png" alt="" className="w-14 h-14 sm:w-16 sm:h-16 object-contain opacity-40" />
           </div>
           <div className="p-5 text-center">
             <h3 className="font-serif text-xl text-wine mb-1">House Fund</h3>
@@ -34,8 +34,8 @@ function Registry() {
 
         {/* Honeymoon Fund card */}
         <div className="rounded-xl border border-cream-dark bg-cream overflow-hidden">
-          <div className="aspect-[4/3] bg-cream-dark flex items-center justify-center">
-            <img src="/sketches/1 champagne.png" alt="" className="w-16 h-16 sm:w-20 sm:h-20 object-contain opacity-50" />
+          <div className="aspect-[3/2] bg-cream-dark/50 flex items-center justify-center">
+            <img src="/sketches/1 champagne.png" alt="" className="w-14 h-14 sm:w-16 sm:h-16 object-contain opacity-40" />
           </div>
           <div className="p-5 text-center">
             <h3 className="font-serif text-xl text-wine mb-1">Honeymoon Fund</h3>

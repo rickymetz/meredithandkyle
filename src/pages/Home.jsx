@@ -19,7 +19,7 @@ function Home() {
         <div className="relative z-10 mt-auto px-8 sm:px-12 md:px-16 pb-24 max-w-2xl">
           <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl text-white leading-tight tracking-wide mb-2">
             Meredith
-            <span className="block text-3xl sm:text-4xl md:text-5xl text-cream-dark my-1 font-sans font-light tracking-widest">
+            <span className="block text-3xl sm:text-4xl md:text-5xl text-cream-dark my-1 font-serif font-light tracking-widest">
               &amp;
             </span>
             Kyle
