@@ -4,30 +4,34 @@ function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6">
-        {/* Gradient placeholder background (will be replaced with photo) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal via-brown to-wine opacity-90" />
+      <section className="relative min-h-[100svh] flex flex-col">
+        {/* Background photo */}
+        <img
+          src="/photos/hero-bridge.jpg"
+          alt="Meredith and Kyle"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
 
-        <div className="relative z-10 max-w-2xl">
-          <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl text-white leading-tight tracking-wide mb-4">
+        {/* Gradient overlay for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent" />
+
+        {/* Names and details pinned to bottom-left */}
+        <div className="relative z-10 mt-auto px-8 sm:px-12 md:px-16 pb-24 max-w-2xl">
+          <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl text-white leading-tight tracking-wide mb-2">
             Meredith
-            <span className="block text-3xl sm:text-4xl md:text-5xl text-cream-dark my-2 font-sans font-light tracking-widest">
+            <span className="block text-3xl sm:text-4xl md:text-5xl text-cream-dark my-1 font-sans font-light tracking-widest">
               &amp;
             </span>
             Kyle
           </h1>
 
-          <p className="text-cream text-lg sm:text-xl md:text-2xl font-sans font-light mt-6 leading-relaxed">
-            Join us for our celebrations in London &amp; Toledo!
-          </p>
-
-          <p className="text-gold font-serif text-2xl sm:text-3xl mt-8 tracking-wider">
-            June 27–30, 2026
+          <p className="text-cream/90 text-lg sm:text-xl font-sans font-light mt-4 leading-relaxed">
+            London &amp; Toledo &middot; June 27–30, 2026
           </p>
         </div>
 
         {/* Scroll-down indicator */}
-        <div className="absolute bottom-8 z-10 animate-bounce">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
           <a href="#details" aria-label="Scroll down">
             <svg
               className="w-8 h-8 text-cream opacity-70"
@@ -57,7 +61,7 @@ function Home() {
 
           <Link
             to="/schedule"
-            className="inline-flex items-center gap-2 bg-wine text-cream px-8 py-3.5 rounded-full font-sans font-semibold text-sm sm:text-base tracking-wide uppercase hover:bg-maroon hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
+            className="inline-flex items-center gap-2 border-2 border-wine text-wine px-8 py-3.5 rounded-full font-sans font-semibold text-sm sm:text-base tracking-wide uppercase hover:bg-wine hover:text-cream-light hover:scale-[1.02] hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
