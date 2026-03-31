@@ -1,3 +1,10 @@
+const sketchMap = [
+  '/sketches/1 champagne.png',
+  '/sketches/3 baijiu.png',
+  '/sketches/2 wine.png',
+  '/sketches/2 gardenias.png',
+]
+
 const schedule = [
   {
     day: 'Saturday, June 27',
@@ -216,30 +223,51 @@ function EventCard({ event }) {
 function Schedule() {
   return (
     <div className="bg-cream-light min-h-screen">
-      {/* Page Header */}
-      <header className="pt-16 pb-10 md:pt-20 md:pb-14 px-6 text-center">
-        <p className="text-brown-light font-sans text-sm tracking-widest uppercase mb-3">
-          Four Days of Celebration
-        </p>
-        <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-wine mb-4">
-          Schedule
-        </h1>
+      {/* Photo Hero Banner */}
+      <div className="relative h-64 sm:h-80 md:h-96 overflow-hidden w-full">
+        <img
+          src="/photos/hero-sitting.jpg"
+          alt="Meredith and Kyle"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-cream-light via-cream-light/20 to-transparent" />
+        <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8 md:bottom-10 md:left-10">
+          <p className="text-brown-light font-sans text-sm tracking-widest uppercase mb-2 drop-shadow-sm">
+            Four Days of Celebration
+          </p>
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-wine drop-shadow-sm">
+            Schedule
+          </h1>
+        </div>
+      </div>
+
+      {/* Subtitle */}
+      <div className="pt-8 pb-6 px-6 text-center">
         <p className="font-sans text-brown text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
           From London to Toledo, join us for a weekend of love, food, and dancing.
         </p>
-      </header>
+      </div>
 
       {/* Timeline */}
       <div className="max-w-2xl mx-auto px-6 pb-20 sm:pb-28">
         {schedule.map((day, dayIndex) => (
           <section key={dayIndex} className="mb-12 last:mb-0">
             {/* Day Header */}
-            <div className="text-center mb-8">
-              <div className="inline-flex flex-col items-center bg-wine text-cream px-6 py-3 rounded-xl shadow-md">
+            <div className="relative text-center mb-8">
+              {/* Decorative sketch accent */}
+              {sketchMap[dayIndex] && (
+                <img
+                  src={sketchMap[dayIndex]}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute -left-4 sm:-left-8 top-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 opacity-15 pointer-events-none"
+                />
+              )}
+              <div className="inline-flex flex-col items-center bg-cream-light border-2 border-wine text-wine px-6 py-3 rounded-xl shadow-md">
                 <span className="font-serif text-xl sm:text-2xl tracking-wide">
                   {day.day}
                 </span>
-                <span className="font-sans text-xs text-cream-dark tracking-widest uppercase mt-0.5">
+                <span className="font-sans text-xs text-wine/60 tracking-widest uppercase mt-0.5">
                   {day.location}
                 </span>
               </div>
