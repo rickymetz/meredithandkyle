@@ -31,7 +31,7 @@ function NavMenu({ mobile = false, onClose }) {
       {mobile && (
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="px-6 pt-8 pb-4 border-b border-cream-dark">
+          <div className="px-6 pt-16 pb-4 border-b border-cream-dark">
             <h2 className="font-serif text-2xl text-wine tracking-wide">
               Meredith &amp; Kyle
             </h2>
