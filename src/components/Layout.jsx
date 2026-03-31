@@ -26,7 +26,7 @@ function Layout() {
   return (
     <div className="min-h-screen bg-cream-light">
       {/* Desktop nav bar - hidden on mobile */}
-      <header className="hidden md:block sticky top-0 z-40 bg-cream-light/95 backdrop-blur-sm border-b border-cream-dark">
+      <header className="hidden md:block sticky top-0 z-40 bg-cream-light/90 backdrop-blur-sm shadow-sm">
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <NavLink to="/" className="font-serif text-xl text-wine tracking-wide hover:opacity-80 transition-opacity">
             Meredith &amp; Kyle

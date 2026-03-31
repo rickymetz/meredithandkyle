@@ -20,7 +20,7 @@ function RSVP() {
         href={EXTERNAL_LINKS.rsvp}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block py-3.5 px-10 rounded-full bg-wine text-cream-light font-sans font-semibold tracking-wide text-base hover:bg-maroon hover:scale-[1.02] hover:shadow-lg transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
+        className="inline-block py-3.5 px-10 rounded-full border-2 border-wine text-wine font-sans font-semibold tracking-wide text-base hover:bg-wine hover:text-cream-light transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
       >
         RSVP Now
       </a>
