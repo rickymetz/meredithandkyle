@@ -2,24 +2,24 @@ import { useState } from 'react'
 
 const faqs = [
   {
+    question: 'Can I bring a date?',
+    answer: 'Please check your invite for your +1!',
+  },
+  {
+    question: 'Are kids welcome?',
+    answer: 'Yes! Children are welcome at all events. The venues can provide high chairs, and Cigarral de las Mercedes can provide cribs.',
+  },
+  {
     question: 'What should I wear?',
-    answer: 'Details coming soon...',
+    answer: 'In London: Smart dress for the civil ceremony and dinner. We will primarily be indoors. For reference, Kyle will be in a suit and tie.\n\nIn Spain: Dress for fun and comfort! It will be hot and some events will be outdoors (grass, gravel), so dress accordingly. For reference, at the big party on June 29, Kyle will be in a linen suit with no tie. Color and flair are very welcome.',
   },
   {
-    question: 'How do I get from London to Toledo?',
-    answer: 'Details coming soon...',
+    question: 'Is it okay to take pictures with our phones and cameras during the wedding?',
+    answer: 'We will have a photographer and videographer in attendance, so we ask that guests refrain from taking photos during the ceremony.',
   },
   {
-    question: 'Where should I stay?',
-    answer: 'Details coming soon...',
-  },
-  {
-    question: "What's the weather like in June?",
-    answer: 'Details coming soon...',
-  },
-  {
-    question: 'Can I bring a plus one?',
-    answer: 'Details coming soon...',
+    question: 'Whom should I call with questions?',
+    answer: 'You can text or WhatsApp Kyle or Meredith.',
   },
 ]
 
@@ -62,7 +62,7 @@ function AccordionItem({ question, answer, index }) {
           open ? 'max-h-96 pb-5' : 'max-h-0'
         }`}
       >
-        <p className="px-1 text-brown-light font-sans text-sm leading-relaxed">
+        <p className="px-1 text-brown-light font-sans text-sm leading-relaxed whitespace-pre-line">
           {answer}
         </p>
       </div>
