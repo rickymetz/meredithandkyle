@@ -25,6 +25,9 @@
     margin: 0;
     font-family: var(--font-sans);
     background-color: var(--color-cream-light);
+    background-image: url('/sketches/sketch-tile.png');
+    background-repeat: repeat;
+    background-size: 500px;
     color: var(--color-brown);
   }
 
