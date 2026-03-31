@@ -8,31 +8,45 @@ function Accommodations() {
           Accommodations
         </h1>
       </div>
-      <div className="max-w-4xl mx-auto px-6 py-10 md:py-16">
-      <p className="text-brown font-sans text-center mb-12">
-        Details coming soon...
-      </p>
+      <div className="max-w-3xl mx-auto px-6 py-10 md:py-16">
+        <p className="text-brown font-sans text-center leading-relaxed mb-6">
+          Here are some hotels that are close to the venues, which are both in Central London.
+          The Esquivels will be staying at The Athenaeum Hotel &amp; Residences, but there are many
+          options. If you need any suggestions, feel free to reach out.
+        </p>
+        <p className="text-brown font-sans text-center leading-relaxed mb-12">
+          In Spain, we are taking care of accommodation and have booked out the Cigarral de las
+          Mercedes for everyone. If you prefer to stay elsewhere in Toledo, please let us know
+          so we can inform the hotel and provide recommendations.
+        </p>
 
-      {/* Skeleton hotel cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="rounded-xl border border-cream-dark bg-cream overflow-hidden animate-pulse"
-          >
-            {/* Image placeholder */}
-            <div className="aspect-[4/3] bg-cream-dark" />
-
-            {/* Text placeholders */}
-            <div className="p-5 space-y-3">
-              <div className="h-5 bg-cream-dark rounded w-3/4" />
-              <div className="h-3 bg-cream-dark rounded w-full" />
-              <div className="h-3 bg-cream-dark rounded w-5/6" />
-              <div className="h-8 bg-cream-dark rounded-full w-1/2 mt-4" />
+        <div className="space-y-6">
+          <div className="rounded-xl border border-cream-dark bg-cream p-6">
+            <div className="flex items-start gap-4">
+              <img src="/sketches/5 stoop.png" alt="" className="w-12 h-12 object-contain opacity-40 shrink-0" aria-hidden="true" />
+              <div>
+                <h3 className="font-serif text-xl text-wine mb-1">The Athenaeum Hotel &amp; Residences</h3>
+                <p className="text-brown/60 font-sans text-sm mb-2">London &middot; Special Event Rate available</p>
+                <p className="text-brown-light font-sans text-sm leading-relaxed">
+                  The Esquivels will be staying here in London. A 15% discount is available for our guests.
+                </p>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+
+          <div className="rounded-xl border border-cream-dark bg-cream p-6">
+            <div className="flex items-start gap-4">
+              <img src="/sketches/2 gardenias.png" alt="" className="w-12 h-12 object-contain opacity-40 shrink-0" aria-hidden="true" />
+              <div>
+                <h3 className="font-serif text-xl text-wine mb-1">Cigarral de las Mercedes</h3>
+                <p className="text-brown/60 font-sans text-sm mb-2">Toledo, Spain</p>
+                <p className="text-brown-light font-sans text-sm leading-relaxed">
+                  We will all be staying here in Spain! Accommodation is taken care of for all guests.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   )
