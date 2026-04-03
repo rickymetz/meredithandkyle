@@ -1,13 +1,14 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { parsePuz } from '../utils/puzParser.js'
 import { PUZZLES } from '../data/puzzles.js'
 import CrosswordGrid from '../components/CrosswordGrid.jsx'
 import CrosswordClues from '../components/CrosswordClues.jsx'
 import CrosswordTimer from '../components/CrosswordTimer.jsx'
 import CrosswordKeyboard from '../components/CrosswordKeyboard.jsx'
-import Leaderboard, { MOCK_SCORES } from '../components/Leaderboard.jsx'
+import Leaderboard from '../components/Leaderboard.jsx'
+import { formatTime } from '../utils/formatTime.js'
 
-// Build cell numbers from grid
+// Build cell numbers from grid (matches parser logic: only number cells starting words > 1 cell)
 function buildCellNumbers(grid, rows, cols) {
   const numbers = Array.from({ length: rows }, () => Array(cols).fill(0))
   let num = 1
@@ -16,11 +17,11 @@ function buildCellNumbers(grid, rows, cols) {
       if (grid[r][c] === '#') continue
       const acrossStart = c === 0 || grid[r][c - 1] === '#'
       const downStart = r === 0 || grid[r - 1][c] === '#'
-      const hasAcross =
-        acrossStart && c + 1 < cols && grid[r][c + 1] !== '#'
-      const hasDown =
-        downStart && r + 1 < rows && grid[r + 1][c] !== '#'
-      if (hasAcross || hasDown) {
+      let acrossLen = 0
+      if (acrossStart) { let cc = c; while (cc < cols && grid[r][cc] !== '#') { acrossLen++; cc++ } }
+      let downLen = 0
+      if (downStart) { let rr = r; while (rr < rows && grid[rr][c] !== '#') { downLen++; rr++ } }
+      if (acrossLen > 1 || downLen > 1) {
         numbers[r][c] = num++
       }
     }
@@ -59,15 +60,117 @@ function getWordCells(clue, direction) {
   return cells
 }
 
-function fmtTime(s) {
-  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-}
 
 function firstWhiteCell(g, rows, cols) {
   for (let r = 0; r < rows; r++)
     for (let c = 0; c < cols; c++)
       if (g[r][c] !== '#') return { row: r, col: c }
   return { row: 0, col: 0 }
+}
+
+function CelebrationModal({ time, puzzleId, playerName, completedPuzzles, onClose, onNextPuzzle, onAllPuzzles }) {
+  const modalRef = useRef(null)
+  const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles[p.id])
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleEscape)
+    modalRef.current?.focus()
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 backdrop-blur-sm px-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Puzzle completed"
+    >
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        className="bg-cream-light border-2 border-wine rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-xl animate-[fadeIn_0.4s_ease-out] outline-none"
+        onKeyDown={(e) => {
+          if (e.key === 'Tab') {
+            const focusable = e.currentTarget.querySelectorAll('button')
+            if (focusable.length === 0) return
+            const first = focusable[0]
+            const last = focusable[focusable.length - 1]
+            if (e.shiftKey && document.activeElement === first) {
+              e.preventDefault()
+              last.focus()
+            } else if (!e.shiftKey && document.activeElement === last) {
+              e.preventDefault()
+              first.focus()
+            }
+          }
+        }}
+      >
+        <div className="text-4xl mb-3" aria-hidden="true">&#129346;&#127870;</div>
+        <h2 className="font-serif text-2xl sm:text-3xl text-wine mb-2">
+          Congratulations!
+        </h2>
+        <p className="text-brown/70 mb-1 text-sm">
+          {playerName}, you completed the puzzle in
+        </p>
+        <p className="font-mono text-3xl font-bold text-wine mb-6">
+          {formatTime(time)}
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 px-4 rounded-lg border-2 border-wine text-wine font-semibold text-sm hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+          >
+            View Board
+          </button>
+          {nextPuzzle ? (
+            <button
+              onClick={() => onNextPuzzle(nextPuzzle.id)}
+              className="flex-1 py-3 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+            >
+              Try {nextPuzzle.label}
+            </button>
+          ) : (
+            <button
+              onClick={onAllPuzzles}
+              className="flex-1 py-3 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+            >
+              All Puzzles
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CompletedBar({ puzzleId, completedPuzzles, onLoadPuzzle, onChangePuzzle }) {
+  const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles[p.id])
+  return (
+    <div className="mt-6 text-center flex justify-center gap-4">
+      {nextPuzzle ? (
+        <button
+          onClick={() => onLoadPuzzle(nextPuzzle.id)}
+          className="py-3 px-8 rounded-lg bg-wine text-cream-light font-sans font-semibold tracking-wide hover:bg-maroon hover:scale-[1.02] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
+        >
+          Try the {nextPuzzle.label} Puzzle
+        </button>
+      ) : (
+        <p className="text-brown/60 font-sans text-sm">
+          You&apos;ve completed all puzzles!
+        </p>
+      )}
+      <button
+        onClick={onChangePuzzle}
+        className="py-3 px-8 rounded-lg border-2 border-wine text-wine font-sans font-semibold tracking-wide hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
+      >
+        All Puzzles
+      </button>
+    </div>
+  )
 }
 
 function Crossword() {
@@ -96,6 +199,7 @@ function Crossword() {
       return JSON.parse(localStorage.getItem('crossword-results') || '{}')
     } catch { return {} }
   })
+  const [refreshKey, setRefreshKey] = useState(0)
 
   // Hide mobile hamburger menu during gameplay
   const inGame = gamePhase === 'playing' || gamePhase === 'complete' || gamePhase === 'entry'
@@ -134,6 +238,7 @@ function Crossword() {
     setLoadError(null)
     try {
       const response = await fetch(puzzle.url)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const buffer = await response.arrayBuffer()
       const data = parsePuz(buffer)
       setPuzzleData(data)
@@ -248,7 +353,7 @@ function Crossword() {
       }
       return true
     },
-    [grid, size.rows, size.cols, puzzle]
+    [grid, rebus, size.rows, size.cols, puzzle]
   )
 
   // Check if all non-black cells are filled
@@ -296,7 +401,7 @@ function Crossword() {
       }
       return { row: nr, col: nc }
     },
-    [grid, size.rows, size.cols]
+    [grid]
   )
 
   // Get ordered list of all clues (across then down)
@@ -371,6 +476,11 @@ function Crossword() {
         const updated = { ...completedPuzzles, [puzzleId]: result }
         setCompletedPuzzles(updated)
         try { localStorage.setItem('crossword-results', JSON.stringify(updated)) } catch {}
+        fetch('/api/scores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ puzzle: puzzleId, name: playerName.trim(), time: currentTime }),
+        }).then(() => setRefreshKey((k) => k + 1)).catch(() => {})
         return
       }
 
@@ -509,10 +619,7 @@ function Crossword() {
         return
       }
 
-      if (/^[a-zA-Z]$/.test(e.key)) {
-        e.preventDefault()
-        handleInput(e.key.toUpperCase())
-      }
+      // Letter input is handled by CrosswordGrid's native keydown handler
     },
     [
       gamePhase,
@@ -568,7 +675,10 @@ function Crossword() {
   }
 
   // Back to puzzle selector
-  const handleChangePuzzle = () => {
+  const handleChangePuzzle = (skipConfirm) => {
+    if (!skipConfirm && gamePhase === 'playing' && timerStarted) {
+      if (!window.confirm('Leave this puzzle? Your progress will be lost.')) return
+    }
     setPuzzleData(null)
     setPuzzleId(null)
     setGamePhase('select')
@@ -577,6 +687,22 @@ function Crossword() {
     setFinalTime(null)
     setCurrentTime(0)
     setShowCelebration(false)
+    setRebusMode(false)
+  }
+
+  // Clear/restart current puzzle
+  const handleRestart = () => {
+    if (!puzzle) return
+    if (timerStarted && !window.confirm('Clear all answers? Your progress will be lost.')) return
+    setPlayerGrid(
+      Array.from({ length: size.rows }, () => Array(size.cols).fill(''))
+    )
+    setTimerStarted(false)
+    setFinalTime(null)
+    setCurrentTime(0)
+    setShowIncorrect(false)
+    setActiveCell(firstWhiteCell(grid, size.rows, size.cols))
+    setActiveDirection('across')
     setRebusMode(false)
   }
 
@@ -609,7 +735,7 @@ function Crossword() {
                       {p.label}
                       {result && (
                         <span className="text-xs font-sans font-semibold text-wine/60 bg-wine/10 px-2 py-0.5 rounded-full">
-                          {fmtTime(result.time)}
+                          {formatTime(result.time)}
                         </span>
                       )}
                     </h3>
@@ -648,7 +774,7 @@ function Crossword() {
 
         {PUZZLES.map((p) => (
           <div key={p.id} className="mb-6">
-            <Leaderboard puzzleId={p.id} />
+            <Leaderboard puzzleId={p.id} refreshKey={refreshKey} />
           </div>
         ))}
       </div>
@@ -673,6 +799,9 @@ function Crossword() {
             className="block text-sm font-semibold text-brown/70 mb-2 text-left"
           >
             Your Name
+            {playerName && (
+              <span className="font-normal text-brown/40 ml-1">(remembered from last visit)</span>
+            )}
           </label>
           <input
             id="player-name"
@@ -702,7 +831,7 @@ function Crossword() {
           &larr; Choose a different puzzle
         </button>
 
-        <Leaderboard puzzleId={puzzleId} />
+        <Leaderboard puzzleId={puzzleId} refreshKey={refreshKey} />
       </div>
     )
   }
@@ -729,6 +858,15 @@ function Crossword() {
           </h1>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
+          {gamePhase === 'playing' && (
+            <button
+              onClick={handleRestart}
+              className="hidden md:inline-flex px-2.5 py-1 rounded text-xs sm:text-sm font-semibold font-sans border-2 bg-cream text-brown/60 border-cream-dark hover:border-wine/40 hover:text-wine transition-all duration-200"
+              title="Clear all answers"
+            >
+              Clear
+            </button>
+          )}
           {hasRebus && gamePhase === 'playing' && (
             <button
               onClick={() => setRebusMode((m) => !m)}
@@ -742,12 +880,17 @@ function Crossword() {
               Rebus
             </button>
           )}
-          <CrosswordTimer
-            started={timerStarted}
-            completed={gamePhase === 'complete'}
-            onTimeUpdate={setCurrentTime}
-            startFrom={currentTime}
-          />
+          <div className="flex flex-col items-end">
+            <CrosswordTimer
+              started={timerStarted}
+              completed={gamePhase === 'complete'}
+              onTimeUpdate={setCurrentTime}
+              startFrom={currentTime}
+            />
+            {gamePhase === 'playing' && !timerStarted && (
+              <span className="text-[0.6rem] text-brown/40 mt-0.5">starts on first input</span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -759,57 +902,15 @@ function Crossword() {
       )}
 
       {/* Completion overlay */}
-      {showCelebration && (() => {
-        const time = finalTime || currentTime
-        const existing = MOCK_SCORES[puzzleId] || []
-        const rank = existing.filter((s) => s.time < time).length + 1
-        const total = existing.length + 1
-        const ordinal = rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`
-        const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles[p.id])
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 backdrop-blur-sm px-4">
-            <div className="bg-cream-light border-2 border-wine rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center shadow-xl animate-[fadeIn_0.4s_ease-out]">
-              <div className="text-4xl mb-3">&#127881;</div>
-              <h2 className="font-serif text-2xl sm:text-3xl text-wine mb-2">
-                Congratulations!
-              </h2>
-              <p className="text-brown/70 mb-1 text-sm">
-                {playerName}, you completed the puzzle in
-              </p>
-              <p className="font-mono text-3xl font-bold text-wine mb-2">
-                {String(Math.floor(time / 60)).padStart(2, '0')}:
-                {String(time % 60).padStart(2, '0')}
-              </p>
-              <p className="text-brown/60 text-sm mb-6">
-                {ordinal} place out of {total}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowCelebration(false)}
-                  className="flex-1 py-3 px-4 rounded-lg border-2 border-wine text-wine font-semibold text-sm hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-                >
-                  View Board
-                </button>
-                {nextPuzzle ? (
-                  <button
-                    onClick={() => { setShowCelebration(false); loadPuzzle(nextPuzzle.id) }}
-                    className="flex-1 py-3 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-                  >
-                    Try {nextPuzzle.label}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleChangePuzzle}
-                    className="flex-1 py-3 px-4 rounded-lg bg-wine text-cream-light font-semibold text-sm hover:bg-maroon transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-                  >
-                    All Puzzles
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )
-      })()}
+      {showCelebration && <CelebrationModal
+        time={finalTime || currentTime}
+        puzzleId={puzzleId}
+        playerName={playerName}
+        completedPuzzles={completedPuzzles}
+        onClose={() => setShowCelebration(false)}
+        onNextPuzzle={(id) => { setShowCelebration(false); loadPuzzle(id) }}
+        onAllPuzzles={() => { setShowCelebration(false); handleChangePuzzle(true) }}
+      />}
 
       {/* Main layout: grid + clues */}
       <div className="md:grid md:grid-cols-[1fr_16rem] lg:grid-cols-[1fr_20rem] md:gap-6">
@@ -845,35 +946,17 @@ function Crossword() {
           puzzleId={puzzleId}
           currentPlayerName={gamePhase === 'complete' ? playerName : null}
           currentPlayerTime={gamePhase === 'complete' ? (finalTime || currentTime) : null}
+          refreshKey={refreshKey}
         />
       </div>
 
       {/* Next puzzle bar for completed state */}
-      {gamePhase === 'complete' && !showCelebration && (() => {
-        const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles[p.id])
-        return (
-          <div className="mt-6 text-center flex justify-center gap-4">
-            {nextPuzzle ? (
-              <button
-                onClick={() => loadPuzzle(nextPuzzle.id)}
-                className="py-3 px-8 rounded-lg bg-wine text-cream-light font-sans font-semibold tracking-wide hover:bg-maroon hover:scale-[1.02] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/50 focus:ring-offset-2 focus:ring-offset-cream-light"
-              >
-                Try the {nextPuzzle.label} Puzzle
-              </button>
-            ) : (
-              <p className="text-brown/60 font-sans text-sm">
-                You&apos;ve completed all puzzles!
-              </p>
-            )}
-            <button
-              onClick={handleChangePuzzle}
-              className="py-3 px-8 rounded-lg border-2 border-wine text-wine font-sans font-semibold tracking-wide hover:bg-wine/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-wine/30"
-            >
-              All Puzzles
-            </button>
-          </div>
-        )
-      })()}
+      {gamePhase === 'complete' && !showCelebration && <CompletedBar
+        puzzleId={puzzleId}
+        completedPuzzles={completedPuzzles}
+        onLoadPuzzle={loadPuzzle}
+        onChangePuzzle={() => handleChangePuzzle(true)}
+      />}
 
       {/* Mobile fixed bottom: clue bar + custom keyboard */}
       {gamePhase === 'playing' && activeClue && (
