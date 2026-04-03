@@ -1,26 +1,5 @@
-export const MOCK_SCORES = {
-  mini: [
-    { name: 'Meredith', time: 42, date: '2026-03-28' },
-    { name: 'Kyle', time: 55, date: '2026-03-28' },
-    { name: 'Sarah', time: 68, date: '2026-03-27' },
-    { name: 'James', time: 74, date: '2026-03-27' },
-    { name: 'Emily', time: 91, date: '2026-03-29' },
-  ],
-  medium: [
-    { name: 'Kyle', time: 120, date: '2026-03-28' },
-    { name: 'Meredith', time: 138, date: '2026-03-28' },
-    { name: 'Sarah', time: 165, date: '2026-03-27' },
-    { name: 'James', time: 198, date: '2026-03-27' },
-    { name: 'Emily', time: 224, date: '2026-03-29' },
-  ],
-  full: [
-    { name: 'Meredith', time: 310, date: '2026-03-28' },
-    { name: 'Kyle', time: 385, date: '2026-03-28' },
-    { name: 'Sarah', time: 442, date: '2026-03-27' },
-    { name: 'James', time: 510, date: '2026-03-27' },
-    { name: 'Emily', time: 578, date: '2026-03-29' },
-  ],
-}
+import { useState, useEffect } from 'react'
+import { formatTime } from '../utils/formatTime.js'
 
 const PUZZLE_LABELS = {
   mini: 'Mini',
@@ -28,49 +7,47 @@ const PUZZLE_LABELS = {
   full: 'Full',
 }
 
-function formatTime(totalSeconds) {
-  const m = Math.floor(totalSeconds / 60)
-  const s = totalSeconds % 60
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-}
-
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime }) {
-  // Get scores for the specific puzzle
-  let scores = [...(MOCK_SCORES[puzzleId] || [])]
+function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime, refreshKey }) {
+  const [scores, setScores] = useState([])
+  const [loading, setLoading] = useState(false)
 
-  // Load saved result from localStorage (persistent)
-  let savedResult = null
-  try {
-    const saved = JSON.parse(localStorage.getItem('crossword-results') || '{}')
-    if (saved[puzzleId]) savedResult = saved[puzzleId]
-  } catch {}
+  useEffect(() => {
+    if (!puzzleId) return
 
-  // Use current session score if available, otherwise use saved
-  const playerName = currentPlayerName || savedResult?.name
-  const playerTime = currentPlayerTime ?? savedResult?.time
-  const playerDate = currentPlayerTime != null
-    ? new Date().toISOString().slice(0, 10)
-    : savedResult?.date
+    let cancelled = false
+    setLoading(true)
 
-  if (playerName && playerTime != null) {
-    scores.push({
-      name: playerName,
-      time: playerTime,
-      date: playerDate,
-      isCurrent: true,
-    })
-  }
+    fetch(`/api/scores?puzzle=${puzzleId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch scores')
+        return res.json()
+      })
+      .then((data) => {
+        if (!cancelled) setScores(Array.isArray(data) ? data : [])
+      })
+      .catch(() => {
+        if (!cancelled) setScores([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
 
-  // Sort by time ascending
-  scores.sort((a, b) => a.time - b.time)
+    return () => { cancelled = true }
+  }, [puzzleId, refreshKey])
 
-  // Keep top 10
-  scores = scores.slice(0, 10)
+  // Mark current player and sort
+  const displayScores = scores
+    .map((s) => ({
+      ...s,
+      isCurrent: s.name === currentPlayerName && s.time === currentPlayerTime,
+    }))
+    .sort((a, b) => a.time - b.time)
+    .slice(0, 10)
 
   return (
     <div className="w-full">
@@ -87,13 +64,20 @@ function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime }) {
           <span className="text-right">Date</span>
         </div>
 
+        {/* Loading state */}
+        {loading && (
+          <div className="px-3 py-6 text-center text-brown/50 text-sm animate-pulse">
+            Loading scores...
+          </div>
+        )}
+
         {/* Rows */}
-        {scores.map((score, i) => {
+        {!loading && displayScores.map((score, i) => {
           const rank = i + 1
           const isCurrent = score.isCurrent
           return (
             <div
-              key={`${score.name}-${i}`}
+              key={`${score.name}-${score.time}-${score.date}`}
               className={`grid grid-cols-[2.5rem_1fr_4.5rem_4.5rem] sm:grid-cols-[3rem_1fr_5rem_5rem] px-3 py-2.5 border-t border-cream-dark/30 text-sm sm:text-base transition-colors ${
                 isCurrent
                   ? 'bg-wine/10 font-semibold text-brown'
@@ -119,7 +103,7 @@ function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime }) {
           )
         })}
 
-        {scores.length === 0 && (
+        {!loading && displayScores.length === 0 && (
           <div className="px-3 py-6 text-center text-brown/50 text-sm">
             No scores yet. Be the first!
           </div>
