@@ -188,7 +188,14 @@ function Crossword() {
           setFinalTime(null)
           setCurrentTime(0)
           setShowCelebration(false)
-          setGamePhase('entry')
+          // Skip name entry if we already have a saved name
+          const savedName = localStorage.getItem('crossword-player-name')
+          if (savedName) {
+            setPlayerName(savedName)
+            setGamePhase('playing')
+          } else {
+            setGamePhase('entry')
+          }
         }
       }
     } catch (err) {
