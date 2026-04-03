@@ -1,9 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 
-function CrosswordTimer({ started, completed, onTimeUpdate }) {
-  const [elapsed, setElapsed] = useState(0)
+function CrosswordTimer({ started, completed, onTimeUpdate, startFrom = 0 }) {
+  const [elapsed, setElapsed] = useState(startFrom)
   const intervalRef = useRef(null)
   const startTimeRef = useRef(null)
+  const offsetRef = useRef(startFrom)
+
+  // Update offset when startFrom changes (e.g. resuming a puzzle)
+  useEffect(() => {
+    offsetRef.current = startFrom
+    setElapsed(startFrom)
+  }, [startFrom])
 
   const stopTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -19,7 +26,7 @@ function CrosswordTimer({ started, completed, onTimeUpdate }) {
       }
       intervalRef.current = setInterval(() => {
         const now = Date.now()
-        const seconds = Math.floor((now - startTimeRef.current) / 1000)
+        const seconds = offsetRef.current + Math.floor((now - startTimeRef.current) / 1000)
         setElapsed(seconds)
         if (onTimeUpdate) onTimeUpdate(seconds)
       }, 250)

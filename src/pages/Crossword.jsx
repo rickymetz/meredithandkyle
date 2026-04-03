@@ -108,6 +108,23 @@ function Crossword() {
     return () => document.documentElement.removeAttribute('data-crossword-active')
   }, [inGame])
 
+  // Save in-progress puzzle state to localStorage
+  const saveProgress = useCallback((id, grid, time) => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('crossword-progress') || '{}')
+      progress[id] = { grid, time, updatedAt: Date.now() }
+      localStorage.setItem('crossword-progress', JSON.stringify(progress))
+    } catch {}
+  }, [])
+
+  const clearProgress = useCallback((id) => {
+    try {
+      const progress = JSON.parse(localStorage.getItem('crossword-progress') || '{}')
+      delete progress[id]
+      localStorage.setItem('crossword-progress', JSON.stringify(progress))
+    } catch {}
+  }, [])
+
   // Load a puzzle from .puz file
   const loadPuzzle = useCallback(async (id) => {
     const puzzle = PUZZLES.find((p) => p.id === id)
@@ -144,18 +161,35 @@ function Crossword() {
         setActiveCell({ row: 0, col: 0 })
         setGamePhase('complete')
       } else {
-        setPlayerGrid(
-          Array.from({ length: data.size.rows }, () =>
-            Array(data.size.cols).fill('')
+        // Check for saved in-progress state
+        let savedProgress
+        try { savedProgress = JSON.parse(localStorage.getItem('crossword-progress') || '{}')[id] } catch {}
+
+        if (savedProgress?.grid) {
+          setPlayerGrid(savedProgress.grid)
+          setCurrentTime(savedProgress.time || 0)
+          setTimerStarted(false)
+          setFinalTime(null)
+          setShowCelebration(false)
+          setShowIncorrect(false)
+          setRebusMode(false)
+          setActiveCell(firstWhiteCell(data.grid, data.size.rows, data.size.cols))
+          setActiveDirection('across')
+          setGamePhase('playing')
+        } else {
+          setPlayerGrid(
+            Array.from({ length: data.size.rows }, () =>
+              Array(data.size.cols).fill('')
+            )
           )
-        )
-        setActiveCell(firstWhiteCell(data.grid, data.size.rows, data.size.cols))
-        setActiveDirection('across')
-        setTimerStarted(false)
-        setFinalTime(null)
-        setCurrentTime(0)
-        setShowCelebration(false)
-        setGamePhase('entry')
+          setActiveCell(firstWhiteCell(data.grid, data.size.rows, data.size.cols))
+          setActiveDirection('across')
+          setTimerStarted(false)
+          setFinalTime(null)
+          setCurrentTime(0)
+          setShowCelebration(false)
+          setGamePhase('entry')
+        }
       }
     } catch (err) {
       setLoadError('Failed to load puzzle. Please try again.')
@@ -317,6 +351,7 @@ function Crossword() {
         newGrid[activeCell.row][activeCell.col] = letter
       }
       setPlayerGrid(newGrid)
+      saveProgress(puzzleId, newGrid, currentTime)
 
       if (checkCompletion(newGrid)) {
         setFinalTime(currentTime)
@@ -324,6 +359,7 @@ function Crossword() {
         setShowCelebration(true)
         setRebusMode(false)
         setShowIncorrect(false)
+        clearProgress(puzzleId)
         const result = { name: playerName.trim(), time: currentTime, date: new Date().toISOString().slice(0, 10) }
         const updated = { ...completedPuzzles, [puzzleId]: result }
         setCompletedPuzzles(updated)
@@ -363,6 +399,8 @@ function Crossword() {
       currentTime,
       completedPuzzles,
       puzzleId,
+      saveProgress,
+      clearProgress,
     ]
   )
 
@@ -379,7 +417,6 @@ function Crossword() {
         const newGrid = playerGrid.map((r) => [...r])
         const cellVal = newGrid[row][col] || ''
         if (rebusMode && cellVal.length > 1) {
-          // In rebus mode, remove last character
           newGrid[row][col] = cellVal.slice(0, -1)
           setPlayerGrid(newGrid)
         } else if (cellVal) {
@@ -393,6 +430,7 @@ function Crossword() {
             setActiveCell(prev)
           }
         }
+        saveProgress(puzzleId, newGrid, currentTime)
         return
       }
 
@@ -483,6 +521,9 @@ function Crossword() {
       moveToPrevCell,
       moveToNextCell,
       handleInput,
+      saveProgress,
+      puzzleId,
+      currentTime,
     ]
   )
 
@@ -698,6 +739,7 @@ function Crossword() {
             started={timerStarted}
             completed={gamePhase === 'complete'}
             onTimeUpdate={setCurrentTime}
+            startFrom={currentTime}
           />
         </div>
       </div>
