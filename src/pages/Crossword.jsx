@@ -200,6 +200,7 @@ function Crossword() {
     } catch { return {} }
   })
   const [refreshKey, setRefreshKey] = useState(0)
+  const [seedScores, setSeedScores] = useState(null)
 
   // Hide mobile hamburger menu during gameplay
   const inGame = gamePhase === 'playing' || gamePhase === 'complete' || gamePhase === 'entry'
@@ -480,7 +481,13 @@ function Crossword() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ puzzle: puzzleId, name: playerName.trim(), time: currentTime }),
-        }).then(() => setRefreshKey((k) => k + 1)).catch(() => {})
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (Array.isArray(data)) setSeedScores({ puzzleId, scores: data })
+            setRefreshKey((k) => k + 1)
+          })
+          .catch(() => {})
         return
       }
 
@@ -947,6 +954,7 @@ function Crossword() {
           currentPlayerName={gamePhase === 'complete' ? playerName : null}
           currentPlayerTime={gamePhase === 'complete' ? (finalTime || currentTime) : null}
           refreshKey={refreshKey}
+          seedScores={seedScores && seedScores.puzzleId === puzzleId ? seedScores.scores : null}
         />
       </div>
 

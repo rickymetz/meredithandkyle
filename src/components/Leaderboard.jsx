@@ -12,12 +12,18 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime, refreshKey }) {
+function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime, refreshKey, seedScores }) {
   const [scores, setScores] = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!puzzleId) return
+
+    if (seedScores) {
+      setScores(seedScores)
+      setLoading(false)
+      return
+    }
 
     let cancelled = false
     setLoading(true)
@@ -38,7 +44,7 @@ function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime, refreshKe
       })
 
     return () => { cancelled = true }
-  }, [puzzleId, refreshKey])
+  }, [puzzleId, refreshKey, seedScores])
 
   // Mark current player and sort
   const displayScores = scores
