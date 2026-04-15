@@ -59,8 +59,8 @@ export default async (request) => {
       return jsonResponse({ error: 'Name required, max 40 characters' }, 400)
     }
 
-    if (typeof time !== 'number' || time < 1 || time > 3600 || !Number.isInteger(time)) {
-      return jsonResponse({ error: 'Time must be an integer 1-3600' }, 400)
+    if (typeof time !== 'number' || time < 1 || time > 86400 || !Number.isInteger(time)) {
+      return jsonResponse({ error: 'Time must be an integer 1-86400' }, 400)
     }
 
     const scores = await getScores(store, puzzle)
