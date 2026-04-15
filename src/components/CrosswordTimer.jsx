@@ -6,11 +6,14 @@ function CrosswordTimer({ started, completed, onTimeUpdate, startFrom = 0 }) {
   const startTimeRef = useRef(null)
   const offsetRef = useRef(startFrom)
 
-  // Update offset when startFrom changes (e.g. resuming a puzzle)
+  // Sync offset from startFrom only while not running (e.g. resuming a puzzle).
+  // Once running, the timer owns the count — syncing here would feed back
+  // through onTimeUpdate and compound.
   useEffect(() => {
+    if (started) return
     offsetRef.current = startFrom
     setElapsed(startFrom)
-  }, [startFrom])
+  }, [started, startFrom])
 
   const stopTimer = useCallback(() => {
     if (intervalRef.current) {
