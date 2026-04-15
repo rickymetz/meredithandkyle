@@ -202,6 +202,39 @@ function Crossword() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [seedScores, setSeedScores] = useState(null)
 
+  // One-time backfill: POST any locally completed results that predate the API sync
+  useEffect(() => {
+    let synced
+    try { synced = JSON.parse(localStorage.getItem('crossword-synced') || '{}') } catch { synced = {} }
+    const pending = Object.entries(completedPuzzles).filter(
+      ([id, r]) => r && r.name && typeof r.time === 'number' && !synced[id]
+    )
+    if (pending.length === 0) return
+
+    let cancelled = false
+    Promise.all(
+      pending.map(([id, r]) =>
+        fetch('/api/scores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ puzzle: id, name: r.name, time: r.time }),
+        })
+          .then((res) => (res.ok ? id : null))
+          .catch(() => null)
+      )
+    ).then((results) => {
+      if (cancelled) return
+      const ok = results.filter(Boolean)
+      if (ok.length === 0) return
+      const next = { ...synced }
+      ok.forEach((id) => { next[id] = true })
+      try { localStorage.setItem('crossword-synced', JSON.stringify(next)) } catch {}
+      setRefreshKey((k) => k + 1)
+    })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Hide mobile hamburger menu during gameplay
   const inGame = gamePhase === 'playing' || gamePhase === 'complete' || gamePhase === 'entry'
   useEffect(() => {
@@ -485,6 +518,13 @@ function Crossword() {
           .then((res) => (res.ok ? res.json() : null))
           .then((data) => {
             if (Array.isArray(data)) setSeedScores({ puzzleId, scores: data })
+            if (data !== null) {
+              try {
+                const synced = JSON.parse(localStorage.getItem('crossword-synced') || '{}')
+                synced[puzzleId] = true
+                localStorage.setItem('crossword-synced', JSON.stringify(synced))
+              } catch {}
+            }
             setRefreshKey((k) => k + 1)
           })
           .catch(() => {})
