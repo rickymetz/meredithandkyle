@@ -90,10 +90,8 @@ function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime, refreshKe
                   : 'text-brown/80'
               }`}
             >
-              <span className="flex items-center">
-                <span className={`font-serif font-bold ${rank === 1 ? 'text-wine' : rank === 2 ? 'text-brown' : rank === 3 ? 'text-brown-light' : 'text-brown/50'}`}>
-                  {rank}
-                </span>
+              <span className={`font-mono font-semibold ${rank === 1 ? 'text-wine' : rank === 2 ? 'text-brown' : rank === 3 ? 'text-brown-light' : 'text-brown/50'}`}>
+                {rank}
               </span>
               <span className="truncate">
                 {score.name}
