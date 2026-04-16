@@ -6,19 +6,22 @@ export const PUZZLES = [
   {
     id: 'mini',
     label: 'Mini',
-    description: '7×7 — Quick warm-up',
+    size: '7×7',
+    description: 'Quick warm-up',
     url: miniPuz,
   },
   {
     id: 'medium',
     label: 'Midi',
-    description: '9×9 — Medium challenge',
+    size: '9×9',
+    description: 'Medium challenge',
     url: mediumPuz,
   },
   {
     id: 'full',
     label: 'Full',
-    description: '15×15 — The real deal',
+    size: '15×15',
+    description: 'The real deal',
     url: fullPuz,
   },
 ]

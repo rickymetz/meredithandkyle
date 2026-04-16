@@ -15,14 +15,14 @@ function CrosswordClues({
     (c) => c.number === activeClueNumber
   )
 
-  // Scroll to active clue in the expanded list
+  // Scroll to active clue (desktop side panel or expanded mobile list)
   useEffect(() => {
     const ref =
       activeDirection === 'across' ? activeAcrossRef : activeDownRef
-    if (ref.current && expanded) {
+    if (ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
-  }, [activeClueNumber, activeDirection, expanded])
+  }, [activeClueNumber, activeDirection])
 
   const renderClueList = (direction, clueList) => (
     <div className="mb-4">
@@ -47,7 +47,14 @@ function CrosswordClues({
               <span className="font-semibold text-wine/70 min-w-[1.5rem] text-right shrink-0">
                 {clue.number}
               </span>
-              <span>{clue.clue}</span>
+              <span>
+                {clue.clue}
+                {clue.hasRebus && (
+                  <span className="ml-1.5 align-middle text-[0.65rem] font-sans font-semibold tracking-wider text-wine/70 bg-wine/10 px-1.5 py-0.5 rounded">
+                    REBUS
+                  </span>
+                )}
+              </span>
             </li>
           )
         })}

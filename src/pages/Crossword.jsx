@@ -779,7 +779,8 @@ function Crossword() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-serif text-xl text-wine group-hover:text-maroon transition-colors flex items-center gap-2">
-                      {p.label}
+                      <span>{p.label}</span>
+                      <span className="font-sans text-sm font-semibold text-wine/50">{p.size}</span>
                       {result && (
                         <span className="text-xs font-sans font-semibold text-wine/60 bg-wine/10 px-2 py-0.5 rounded-full">
                           {formatTime(result.time)}
@@ -1026,6 +1027,11 @@ function Crossword() {
               </span>
               {' '}
               {activeClue.clue}
+              {activeClue.hasRebus && (
+                <span className="ml-1.5 align-middle text-[0.65rem] font-sans font-semibold tracking-wider text-wine/70 bg-wine/10 px-1.5 py-0.5 rounded">
+                  REBUS
+                </span>
+              )}
             </p>
             <button
               onClick={() => navigateClue(1)}

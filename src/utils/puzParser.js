@@ -157,6 +157,21 @@ export function parsePuz(buffer) {
     }
   }
 
+  // Flag clues whose answer uses any rebus cell
+  const annotateRebus = (list, dir) => {
+    for (const clue of list) {
+      let hit = false
+      for (let i = 0; i < clue.length; i++) {
+        const rr = dir === 'across' ? clue.row : clue.row + i
+        const cc = dir === 'across' ? clue.col + i : clue.col
+        if (rebus[rr]?.[cc]) { hit = true; break }
+      }
+      clue.hasRebus = hit
+    }
+  }
+  annotateRebus(across, 'across')
+  annotateRebus(down, 'down')
+
   return {
     size: { rows: height, cols: width },
     grid,

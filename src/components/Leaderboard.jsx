@@ -84,7 +84,7 @@ function Leaderboard({ puzzleId, currentPlayerName, currentPlayerTime, refreshKe
           return (
             <div
               key={`${score.name}-${score.time}-${score.date}`}
-              className={`grid grid-cols-[2.5rem_1fr_4.5rem_4.5rem] sm:grid-cols-[3rem_1fr_5rem_5rem] px-3 py-2.5 border-t border-cream-dark/30 text-sm sm:text-base transition-colors ${
+              className={`grid items-baseline grid-cols-[2.5rem_1fr_4.5rem_4.5rem] sm:grid-cols-[3rem_1fr_5rem_5rem] px-3 py-2.5 border-t border-cream-dark/30 text-sm sm:text-base transition-colors ${
                 isCurrent
                   ? 'bg-wine/10 font-semibold text-brown'
                   : 'text-brown/80'
