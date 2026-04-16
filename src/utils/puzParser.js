@@ -183,13 +183,10 @@ export function parsePuz(buffer) {
   };
 }
 
-/** Decode a byte range as a Latin-1 string */
+/** Decode a byte range as a Windows-1252 string (the .puz file charset) */
+const puzDecoder = new TextDecoder('windows-1252')
 function decodeString(bytes, start, end) {
-  let s = '';
-  for (let i = start; i < end; i++) {
-    s += String.fromCharCode(bytes[i]);
-  }
-  return s;
+  return puzDecoder.decode(bytes.subarray(start, end))
 }
 
 /** Build a 2D array of cell numbers (0 = no number) */
