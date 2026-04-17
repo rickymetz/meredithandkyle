@@ -466,7 +466,7 @@ function Crossword() {
 
   // Navigate to next/previous clue
   const navigateClue = useCallback(
-    (delta) => {
+    (delta, currentGrid) => {
       if (!activeClue || allCluesOrdered.length === 0) return
       const idx = allCluesOrdered.findIndex(
         (c) => c.number === activeClue.number && c.dir === activeDirection
@@ -475,7 +475,7 @@ function Crossword() {
       const nextIdx = (idx + delta + allCluesOrdered.length) % allCluesOrdered.length
       const next = allCluesOrdered[nextIdx]
       setActiveDirection(next.dir)
-      setActiveCell(firstEmptyCellInClue(next, next.dir, playerGrid))
+      setActiveCell(firstEmptyCellInClue(next, next.dir, currentGrid || playerGrid))
     },
     [activeClue, activeDirection, allCluesOrdered, playerGrid]
   )
@@ -565,7 +565,7 @@ function Crossword() {
           setActiveCell(next)
         } else {
           // Word is full — auto-advance to the next clue
-          navigateClue(1)
+          navigateClue(1, newGrid)
         }
       }
     },
