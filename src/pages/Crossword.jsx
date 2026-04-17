@@ -68,6 +68,16 @@ function firstWhiteCell(g, rows, cols) {
   return { row: 0, col: 0 }
 }
 
+function firstEmptyCellInClue(clue, direction, playerGrid) {
+  if (!clue) return null
+  for (let i = 0; i < clue.length; i++) {
+    const r = direction === 'across' ? clue.row : clue.row + i
+    const c = direction === 'across' ? clue.col + i : clue.col
+    if (!playerGrid[r]?.[c]) return { row: r, col: c }
+  }
+  return { row: clue.row, col: clue.col }
+}
+
 function CelebrationModal({ time, puzzleId, playerName, completedPuzzles, onClose, onNextPuzzle, onAllPuzzles }) {
   const modalRef = useRef(null)
   const nextPuzzle = PUZZLES.find((p) => p.id !== puzzleId && !completedPuzzles[p.id])
@@ -312,7 +322,16 @@ function Crossword() {
           setShowCelebration(false)
           setShowIncorrect(false)
           setRebusMode(false)
-          setActiveCell(firstWhiteCell(data.grid, data.size.rows, data.size.cols))
+          const hasEmpty = (clue, dir, g) => {
+            for (let i = 0; i < clue.length; i++) {
+              const r = dir === 'across' ? clue.row : clue.row + i
+              const c = dir === 'across' ? clue.col + i : clue.col
+              if (!g[r]?.[c]) return true
+            }
+            return false
+          }
+          const firstIncomplete = data.clues.across.find((c) => hasEmpty(c, 'across', savedProgress.grid)) || data.clues.across[0]
+          setActiveCell(firstEmptyCellInClue(firstIncomplete, 'across', savedProgress.grid))
           setActiveDirection('across')
           setGamePhase('playing')
         } else {
@@ -321,7 +340,8 @@ function Crossword() {
               Array(data.size.cols).fill('')
             )
           )
-          setActiveCell(firstWhiteCell(data.grid, data.size.rows, data.size.cols))
+          const firstAcross = data.clues.across[0]
+          setActiveCell(firstAcross ? { row: firstAcross.row, col: firstAcross.col } : firstWhiteCell(data.grid, data.size.rows, data.size.cols))
           setActiveDirection('across')
           setTimerStarted(false)
           setFinalTime(null)
@@ -455,9 +475,9 @@ function Crossword() {
       const nextIdx = (idx + delta + allCluesOrdered.length) % allCluesOrdered.length
       const next = allCluesOrdered[nextIdx]
       setActiveDirection(next.dir)
-      setActiveCell({ row: next.row, col: next.col })
+      setActiveCell(firstEmptyCellInClue(next, next.dir, playerGrid))
     },
-    [activeClue, activeDirection, allCluesOrdered]
+    [activeClue, activeDirection, allCluesOrdered, playerGrid]
   )
 
   // Handle cell click
@@ -612,7 +632,7 @@ function Crossword() {
         const nextClue = allClues[nextIdx]
         const nextDir = clues.across.includes(nextClue) ? 'across' : 'down'
         setActiveDirection(nextDir)
-        setActiveCell({ row: nextClue.row, col: nextClue.col })
+        setActiveCell(firstEmptyCellInClue(nextClue, nextDir, playerGrid))
         return
       }
 
@@ -693,9 +713,9 @@ function Crossword() {
     const clue = clues[direction].find((c) => c.number === number)
     if (clue) {
       setActiveDirection(direction)
-      setActiveCell({ row: clue.row, col: clue.col })
+      setActiveCell(firstEmptyCellInClue(clue, direction, playerGrid))
     }
-  }, [clues])
+  }, [clues, playerGrid])
 
   // Start game
   const handleStart = () => {
